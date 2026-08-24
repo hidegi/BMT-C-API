@@ -1,8 +1,6 @@
 name: bmt-ci
 
 on:
-  push:
-    branches: [ master, 'feature/*', 'refactor/*', 'bug/*', 'quickfix/*' ]
   pull_request:
     branches: [ master, 'feature/*', 'refactor/*', 'bug/*', 'quickfix/*' ]
 
