@@ -20,8 +20,8 @@
  * 3. This notice may not be removed or altered from any source
  * distribution.
  ****************************************************************************/
-#ifndef MT3_DEBUG_H
-#define MT3_DEBUG_H
+#ifndef BMT_DEBUG_H
+#define BMT_DEBUG_H
 #ifdef NDEBUG
 #define SP_NO_DEBUG
 #endif

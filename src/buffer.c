@@ -7,7 +7,7 @@
  * it, you can buy us a beer in return.
  * -----------------------------------------------------------------------------
  */
-#include "mt3.h"
+#include "bmt.h"
 #include "buffer.h"
 
 #ifdef SP_COMPILER_GNUC

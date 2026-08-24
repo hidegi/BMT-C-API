@@ -20,45 +20,45 @@
  * 3. This notice may not be removed or altered from any source
  * distribution.
  ****************************************************************************/
-#ifndef MT3_INTERNAL_IMPL_H
-#define MT3_INTERNAL_IMPL_H
-#include "mt3.h"
-#define MT3_CHECKED_CALLOC(ptr, n, size, on_error)\
+#ifndef BMT_INTERNAL_IMPL_H
+#define BMT_INTERNAL_IMPL_H
+#include "bmt.h"
+#define BMT_CHECKED_CALLOC(ptr, n, size, on_error)\
 	do\
 	{\
 		if(!((ptr) = calloc(n, size)))\
 		{\
-			errno = MT3_STATUS_NO_MEMORY;\
+			errno = BMT_STATUS_NO_MEMORY;\
 			on_error;\
 		}\
 	} while(0)
 
 
-void _mt3_update(MT3_node node);
-void _mt3_update_tree(MT3_node node);
-void _mt3_update_list(MT3_node node);
-const SPchar* _mt3_tag_to_str(MT3_tag tag);
-MT3_node _mt3_search(const MT3_node tree, const SPchar* name);
-SPbool _mt3_is_name_valid(const SPchar* name);
-SPint _mt3_strcmp(const SPchar* a, const SPchar* b);
-void _mt3_strncpy(SPchar** dst, const SPchar* src, SPsize length);
-SPbuffer _mt3_compress(const void* memory, SPsize length);
-SPbuffer _mt3_decompress(const void* memory, SPsize length);
-void _mt3_encode_tree(const MT3_node tree, SPbuffer* buffer, int level);
-void _mt3_encode_list(const MT3_node list, SPbuffer* buffer, int level);
-MT3_node _mt3_decode_tree(const SPubyte** memory, SPsize* length);
-SPbool _mt3_decode_list(MT3_node node, const SPubyte** memory, SPsize* length);
-SPbool _mt3_is_tree_equal(const MT3_node a, const MT3_node b);
-SPbool _mt3_is_list_equal(const MT3_node a, const MT3_node b);
-SPbool _mt3_is_root(const MT3_node node);
-SPbool _mt3_is_major(const MT3_node node);
-void _mt3_delete_tree_impl(MT3_node tree);
-void _mt3_delete_list_impl(MT3_node tree);
-void _mt3_fix_rbt_violations(MT3_node node, MT3_node* head);
-void _mt3_delete_node(MT3_node n);
-void _mt3_bst_delete_impl(MT3_node n, MT3_node* _r, MT3_node* _x, MT3_node* _w, MT3_node* head);
-SPbool _mt3_fix_up_rbt(SPbool redBefore, MT3_node r, MT3_node x, MT3_node w, MT3_node* head);
-void _mt3_print_tree(const MT3_node tree, SPbuffer* buffer, int level);
-void _mt3_print_list(const MT3_node tree, SPbuffer* buffer, int level);
-SPsize _mt3_length_of_list(const MT3_node list);
+void _bmt_update(BMT_node node);
+void _bmt_update_tree(BMT_node node);
+void _bmt_update_list(BMT_node node);
+const SPchar* _bmt_tag_to_str(BMT_tag tag);
+BMT_node _bmt_search(const BMT_node tree, const SPchar* name);
+SPbool _bmt_is_name_valid(const SPchar* name);
+SPint _bmt_strcmp(const SPchar* a, const SPchar* b);
+void _bmt_strncpy(SPchar** dst, const SPchar* src, SPsize length);
+SPbuffer _bmt_compress(const void* memory, SPsize length);
+SPbuffer _bmt_decompress(const void* memory, SPsize length);
+void _bmt_encode_tree(const BMT_node tree, SPbuffer* buffer, int level);
+void _bmt_encode_list(const BMT_node list, SPbuffer* buffer, int level);
+BMT_node _bmt_decode_tree(const SPubyte** memory, SPsize* length);
+SPbool _bmt_decode_list(BMT_node node, const SPubyte** memory, SPsize* length);
+SPbool _bmt_is_tree_equal(const BMT_node a, const BMT_node b);
+SPbool _bmt_is_list_equal(const BMT_node a, const BMT_node b);
+SPbool _bmt_is_root(const BMT_node node);
+SPbool _bmt_is_major(const BMT_node node);
+void _bmt_delete_tree_impl(BMT_node tree);
+void _bmt_delete_list_impl(BMT_node tree);
+void _bmt_fix_rbt_violations(BMT_node node, BMT_node* head);
+void _bmt_delete_node(BMT_node n);
+void _bmt_bst_delete_impl(BMT_node n, BMT_node* _r, BMT_node* _x, BMT_node* _w, BMT_node* head);
+SPbool _bmt_fix_up_rbt(SPbool redBefore, BMT_node r, BMT_node x, BMT_node w, BMT_node* head);
+void _bmt_print_tree(const BMT_node tree, SPbuffer* buffer, int level);
+void _bmt_print_list(const BMT_node tree, SPbuffer* buffer, int level);
+SPsize _bmt_length_of_list(const BMT_node list);
 #endif

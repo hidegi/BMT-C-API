@@ -30,22 +30,22 @@
 #pragma GCC diagnostic ignored "-Wformat"
 #endif
 
-#define MT3_READ_GENERIC(dst, n, scanner, fail)\
+#define BMT_READ_GENERIC(dst, n, scanner, fail)\
 	do\
 	{\
 		if(*length < (n))\
 		{\
-			errno = MT3_STATUS_READ_ERROR;\
+			errno = BMT_STATUS_READ_ERROR;\
 			fail;\
 		}\
 		*memory = scanner((dst), *memory, (n));\
 		*length -= n;\
 	} while(0)
 		
-#define ne2be _mt3_big_endian_to_native_endian
-#define be2ne _mt3_big_endian_to_native_endian
+#define ne2be _bmt_big_endian_to_native_endian
+#define be2ne _bmt_big_endian_to_native_endian
 
-static SPbool _mt3_is_little_endian()
+static SPbool _bmt_is_little_endian()
 {
 	SPuint16 t = 0x0001;
 	SPchar c[2];
@@ -53,7 +53,7 @@ static SPbool _mt3_is_little_endian()
 	return c[0];
 }
 
-static void* _mt3_swap_bytes(void* s, SPsize length)
+static void* _bmt_swap_bytes(void* s, SPsize length)
 {
 	for(SPchar *b = s, *e = b + length - 1; b < e; b++, e--)
 	{
@@ -64,24 +64,24 @@ static void* _mt3_swap_bytes(void* s, SPsize length)
 	return s;
 }
 
-static void* _mt3_big_endian_to_native_endian(void* s, SPsize len)
+static void* _bmt_big_endian_to_native_endian(void* s, SPsize len)
 {
-	return _mt3_is_little_endian() ? _mt3_swap_bytes(s, len) : s;
+	return _bmt_is_little_endian() ? _bmt_swap_bytes(s, len) : s;
 }
 
-static const void* _mt3_memcpy(void* dst, const void* src, SPsize n)
+static const void* _bmt_memcpy(void* dst, const void* src, SPsize n)
 {
 	memcpy(dst, src, n);
 	return (const SPchar*) src + n;
 }
 
-static const void* _mt3_swapped_memcpy(void* dst, const void* src, SPsize n)
+static const void* _bmt_swapped_memcpy(void* dst, const void* src, SPsize n)
 {
-	const void* ret = _mt3_memcpy(dst, src, n);
+	const void* ret = _bmt_memcpy(dst, src, n);
 	return ne2be(dst, n), ret;
 }
 
-SPbuffer _mt3_compress(const void* memory, SPsize length)
+SPbuffer _bmt_compress(const void* memory, SPsize length)
 {
 	const SPsize CHUNK_SIZE = 4096;
 	SPbuffer buffer = SP_BUFFER_INIT;
@@ -103,13 +103,13 @@ SPbuffer _mt3_compress(const void* memory, SPsize length)
 		8,
 		Z_DEFAULT_STRATEGY) != Z_OK)
 	{
-	    errno = MT3_STATUS_WRITE_ERROR;
+	    errno = BMT_STATUS_WRITE_ERROR;
 		return SP_BUFFER_INIT;
 	}
 
     	if(stream.avail_in != length)
     	{
-        	errno = MT3_STATUS_WRITE_ERROR;
+        	errno = BMT_STATUS_WRITE_ERROR;
         	return buffer;
     	}
 
@@ -117,7 +117,7 @@ SPbuffer _mt3_compress(const void* memory, SPsize length)
 	{
 		if(!spBufferReserve(&buffer, buffer.length + CHUNK_SIZE))
 		{
-			errno = MT3_STATUS_NO_MEMORY;
+			errno = BMT_STATUS_NO_MEMORY;
 			spBufferFree(&buffer);
 			return SP_BUFFER_INIT;
 		}
@@ -127,7 +127,7 @@ SPbuffer _mt3_compress(const void* memory, SPsize length)
 
 		if(deflate(&stream, Z_FINISH) == Z_STREAM_ERROR)
 		{
-			errno = MT3_STATUS_WRITE_ERROR;
+			errno = BMT_STATUS_WRITE_ERROR;
 			spBufferFree(&buffer);
 			return SP_BUFFER_INIT;
 		}
@@ -139,7 +139,7 @@ SPbuffer _mt3_compress(const void* memory, SPsize length)
 	return buffer;
 }
 
-SPbuffer _mt3_decompress(const void* memory, SPsize length)
+SPbuffer _bmt_decompress(const void* memory, SPsize length)
 {
 	const SPsize CHUNK_SIZE = 4096;
 	SPbuffer buffer = SP_BUFFER_INIT;
@@ -155,7 +155,7 @@ SPbuffer _mt3_decompress(const void* memory, SPsize length)
 
 	if(inflateInit2(&stream, 47) != Z_OK)
 	{
-	    errno = MT3_STATUS_READ_ERROR;
+	    errno = BMT_STATUS_READ_ERROR;
 		return SP_BUFFER_INIT;
 	}
 
@@ -164,7 +164,7 @@ SPbuffer _mt3_decompress(const void* memory, SPsize length)
 	{
 		if(!spBufferReserve(&buffer, buffer.length + CHUNK_SIZE))
 		{
-		    errno = MT3_STATUS_NO_MEMORY;
+		    errno = BMT_STATUS_NO_MEMORY;
 			spBufferFree(&buffer);
 			return SP_BUFFER_INIT;
 		}
@@ -178,7 +178,7 @@ SPbuffer _mt3_decompress(const void* memory, SPsize length)
 			case Z_DATA_ERROR:
 			case Z_NEED_DICT:
 			{
-				errno = MT3_STATUS_READ_ERROR;
+				errno = BMT_STATUS_READ_ERROR;
 				spBufferFree(&buffer);
 				return SP_BUFFER_INIT;
 			}
@@ -189,7 +189,7 @@ SPbuffer _mt3_decompress(const void* memory, SPsize length)
 
 	if(zlib_ret != Z_STREAM_END)
 	{
-		errno = MT3_STATUS_READ_ERROR;
+		errno = BMT_STATUS_READ_ERROR;
 		return SP_BUFFER_INIT;
 	}
 
@@ -197,160 +197,160 @@ SPbuffer _mt3_decompress(const void* memory, SPsize length)
 	return buffer;
 }
 
-static void* _mt3_alloc_chunk(SPsize size)
+static void* _bmt_alloc_chunk(SPsize size)
 {
 	SPbyte* ptr = NULL;
-	MT3_CHECKED_CALLOC(ptr, size, sizeof(SPbyte), return NULL);
+	BMT_CHECKED_CALLOC(ptr, size, sizeof(SPbyte), return NULL);
 	return ptr;
 }
 
-static void _mt3_write_bytes(SPbuffer* buffer, const SPubyte* src, SPsize length, SPbool toNativeEndian, int level)
+static void _bmt_write_bytes(SPbuffer* buffer, const SPubyte* src, SPsize length, SPbool toNativeEndian, int level)
 {
-	SPubyte* chunk = _mt3_alloc_chunk(length);
+	SPubyte* chunk = _bmt_alloc_chunk(length);
 	if(toNativeEndian)
-		_mt3_swapped_memcpy(chunk, src, length);
+		_bmt_swapped_memcpy(chunk, src, length);
 	else
-		_mt3_memcpy(chunk, src, length);
+		_bmt_memcpy(chunk, src, length);
 	
 	if(!spBufferAppend(buffer, chunk, length))
 	{
 		free(chunk);
-		errno = MT3_STATUS_WRITE_ERROR;
+		errno = BMT_STATUS_WRITE_ERROR;
 		return;
 	}
 	free(chunk);
 }
 
-static void _mt3_encode(const MT3_node node, SPbuffer* buffer, int level)
+static void _bmt_encode(const BMT_node node, SPbuffer* buffer, int level)
 {	
 	if(node)
 	{
 		switch(node->tag)
 		{
-			case MT3_TAG_BYTE: _mt3_write_bytes(buffer, (const SPubyte*) &node->payload.tag_byte, sizeof(SPbyte), SP_TRUE, level); break;
-			case MT3_TAG_SHORT: _mt3_write_bytes(buffer, (const SPubyte*) &node->payload.tag_short, sizeof(SPshort), SP_TRUE, level); break;
-			case MT3_TAG_INT: _mt3_write_bytes(buffer, (const SPubyte*) &node->payload.tag_int, sizeof(SPint), SP_TRUE, level); break;
-			case MT3_TAG_LONG: _mt3_write_bytes(buffer, (const SPubyte*) &node->payload.tag_long, sizeof(SPlong), SP_TRUE, level); break;
-			case MT3_TAG_FLOAT: _mt3_write_bytes(buffer, (const SPubyte*) &node->payload.tag_float, sizeof(SPfloat), SP_TRUE, level); break;
-			case MT3_TAG_DOUBLE: _mt3_write_bytes(buffer, (const SPubyte*) &node->payload.tag_double, sizeof(SPdouble), SP_TRUE, level); break;
-			case MT3_TAG_STRING:
+			case BMT_TAG_BYTE: _bmt_write_bytes(buffer, (const SPubyte*) &node->payload.tag_byte, sizeof(SPbyte), SP_TRUE, level); break;
+			case BMT_TAG_SHORT: _bmt_write_bytes(buffer, (const SPubyte*) &node->payload.tag_short, sizeof(SPshort), SP_TRUE, level); break;
+			case BMT_TAG_INT: _bmt_write_bytes(buffer, (const SPubyte*) &node->payload.tag_int, sizeof(SPint), SP_TRUE, level); break;
+			case BMT_TAG_LONG: _bmt_write_bytes(buffer, (const SPubyte*) &node->payload.tag_long, sizeof(SPlong), SP_TRUE, level); break;
+			case BMT_TAG_FLOAT: _bmt_write_bytes(buffer, (const SPubyte*) &node->payload.tag_float, sizeof(SPfloat), SP_TRUE, level); break;
+			case BMT_TAG_DOUBLE: _bmt_write_bytes(buffer, (const SPubyte*) &node->payload.tag_double, sizeof(SPdouble), SP_TRUE, level); break;
+			case BMT_TAG_STRING:
 			{
 				SP_ASSERT(node->payload.tag_string, "Node %s has invalid data to write", node->name);
-				_mt3_write_bytes(buffer, (const SPubyte*) &node->length, sizeof(SPsize), SP_TRUE, level);
-				_mt3_write_bytes(buffer, (const SPubyte*) node->payload.tag_string, node->length, SP_FALSE, level);
+				_bmt_write_bytes(buffer, (const SPubyte*) &node->length, sizeof(SPsize), SP_TRUE, level);
+				_bmt_write_bytes(buffer, (const SPubyte*) node->payload.tag_string, node->length, SP_FALSE, level);
 				break;
 			}
 			
-			case MT3_TAG_ROOT:
+			case BMT_TAG_ROOT:
 			{
-				_mt3_encode_tree(node->payload.tag_object, buffer, level + 1);
+				_bmt_encode_tree(node->payload.tag_object, buffer, level + 1);
 				break;
 			}
 			
 			default:
 			{
-				SPsize length = _mt3_length_of_list(node->payload.tag_object);
+				SPsize length = _bmt_length_of_list(node->payload.tag_object);
 				SP_ASSERT(node->length == length, "Expected length of %lld for list but got length of %lld", length, node->length);
-				_mt3_write_bytes(buffer, (const SPubyte*) &node->length, sizeof(SPsize), SP_TRUE, level);
-				_mt3_encode_list(node->payload.tag_object, buffer, level);
+				_bmt_write_bytes(buffer, (const SPubyte*) &node->length, sizeof(SPsize), SP_TRUE, level);
+				_bmt_encode_list(node->payload.tag_object, buffer, level);
 				break;
 			}
 		}
 	}
 }
 
-void _mt3_encode_tree(const MT3_node tree, SPbuffer* buffer, int level)
+void _bmt_encode_tree(const BMT_node tree, SPbuffer* buffer, int level)
 {
 	if(!tree)
 	{
-		MT3_tag null = MT3_TAG_NULL;
-		_mt3_write_bytes(buffer, (const SPubyte*) &null, sizeof(SPbyte), SP_FALSE, level);
+		BMT_tag null = BMT_TAG_NULL;
+		_bmt_write_bytes(buffer, (const SPubyte*) &null, sizeof(SPbyte), SP_FALSE, level);
 		return;
 	}
 	
 	//encode the tag
 	SPuint8 tag = tree->tag | ((tree->red & 1) << 6);
-	_mt3_write_bytes(buffer, (const SPubyte*) &tag, sizeof(SPbyte), SP_FALSE, level);
+	_bmt_write_bytes(buffer, (const SPubyte*) &tag, sizeof(SPbyte), SP_FALSE, level);
 
 	//encode the name
-	_mt3_write_bytes(buffer, &tree->nameLength, sizeof(SPubyte), SP_FALSE, level);
-	_mt3_write_bytes(buffer, (const SPubyte*) tree->name, tree->nameLength, SP_FALSE, level);
+	_bmt_write_bytes(buffer, &tree->nameLength, sizeof(SPubyte), SP_FALSE, level);
+	_bmt_write_bytes(buffer, (const SPubyte*) tree->name, tree->nameLength, SP_FALSE, level);
 
 	//encode generic
-	_mt3_encode(tree, buffer, level);
+	_bmt_encode(tree, buffer, level);
 
-	_mt3_encode_tree(tree->major, buffer, level + 1);
-	_mt3_encode_tree(tree->minor, buffer, level + 1);
+	_bmt_encode_tree(tree->major, buffer, level + 1);
+	_bmt_encode_tree(tree->minor, buffer, level + 1);
 }
 
-void _mt3_encode_list(const MT3_node list, SPbuffer* buffer, int level)
+void _bmt_encode_list(const BMT_node list, SPbuffer* buffer, int level)
 {
     	if(list)
     	{
-	        SP_ASSERT(mt3_IsList(list), "Expected list to encode");
-	        MT3_node cursor = NULL;
+	        SP_ASSERT(bmt_IsList(list), "Expected list to encode");
+	        BMT_node cursor = NULL;
 	        SPsize i = 0;
 	
 	        for(cursor = list; cursor != NULL; cursor = cursor->major)
 	        {
-	            if(cursor->tag & MT3_TAG_LIST)
+	            if(cursor->tag & BMT_TAG_LIST)
 	            {
 	                //encode the tag, if it is a multi-list
 	                SPuint8 tag = list->tag | ((list->red & 1) << 6);
-	                _mt3_write_bytes(buffer, (const SPubyte*) &tag, sizeof(SPbyte), SP_FALSE, level);
+	                _bmt_write_bytes(buffer, (const SPubyte*) &tag, sizeof(SPbyte), SP_FALSE, level);
 	            }
-	            _mt3_encode(cursor, buffer, level);
+	            _bmt_encode(cursor, buffer, level);
 	        }
 	}
 }
 
-SPbuffer mt3_EncodeTree(const MT3_node tree)
+SPbuffer bmt_EncodeTree(const BMT_node tree)
 {
 	SPbuffer buffer = SP_BUFFER_INIT;
 	
-	if(!mt3_IsTree(tree))
+	if(!bmt_IsTree(tree))
 	{
-		errno = MT3_STATUS_NOT_A_TREE;
+		errno = BMT_STATUS_NOT_A_TREE;
 		return buffer;
 	}
 	
-	_mt3_update(tree);
-	_mt3_encode_tree(tree, &buffer, 0);
-	SPbuffer compressed = _mt3_compress(buffer.data, buffer.length);
+	_bmt_update(tree);
+	_bmt_encode_tree(tree, &buffer, 0);
+	SPbuffer compressed = _bmt_compress(buffer.data, buffer.length);
 	spBufferFree(&buffer);
 	return compressed;
 }
 
-static SPbool _mt3_decode(MT3_node node, const SPubyte** memory, SPsize* length)
+static SPbool _bmt_decode(BMT_node node, const SPubyte** memory, SPsize* length)
 {
 	if(node)
 	{
-		SP_ASSERT(node->tag != MT3_TAG_NULL, "Expected type");
+		SP_ASSERT(node->tag != BMT_TAG_NULL, "Expected type");
 		switch(node->tag)
 		{
-			case MT3_TAG_BYTE: MT3_READ_GENERIC(&node->payload.tag_byte, sizeof(SPbyte), _mt3_swapped_memcpy, return SP_FALSE); node->length = sizeof(SPbyte); break;
-			case MT3_TAG_SHORT: MT3_READ_GENERIC(&node->payload.tag_short, sizeof(SPshort), _mt3_swapped_memcpy, return SP_FALSE); node->length = sizeof(SPshort); break;
-			case MT3_TAG_INT: MT3_READ_GENERIC(&node->payload.tag_int, sizeof(SPint), _mt3_swapped_memcpy, return SP_FALSE); node->length = sizeof(SPint); break;
-			case MT3_TAG_LONG: MT3_READ_GENERIC(&node->payload.tag_long, sizeof(SPlong), _mt3_swapped_memcpy, return SP_FALSE); node->length = sizeof(SPlong); break;
-			case MT3_TAG_FLOAT: MT3_READ_GENERIC(&node->payload.tag_float, sizeof(SPfloat), _mt3_swapped_memcpy, return SP_FALSE); node->length = sizeof(SPfloat); break;
-			case MT3_TAG_DOUBLE: MT3_READ_GENERIC(&node->payload.tag_double, sizeof(SPdouble), _mt3_swapped_memcpy, return SP_FALSE); node->length = sizeof(SPdouble); break;
-			case MT3_TAG_STRING:
+			case BMT_TAG_BYTE: BMT_READ_GENERIC(&node->payload.tag_byte, sizeof(SPbyte), _bmt_swapped_memcpy, return SP_FALSE); node->length = sizeof(SPbyte); break;
+			case BMT_TAG_SHORT: BMT_READ_GENERIC(&node->payload.tag_short, sizeof(SPshort), _bmt_swapped_memcpy, return SP_FALSE); node->length = sizeof(SPshort); break;
+			case BMT_TAG_INT: BMT_READ_GENERIC(&node->payload.tag_int, sizeof(SPint), _bmt_swapped_memcpy, return SP_FALSE); node->length = sizeof(SPint); break;
+			case BMT_TAG_LONG: BMT_READ_GENERIC(&node->payload.tag_long, sizeof(SPlong), _bmt_swapped_memcpy, return SP_FALSE); node->length = sizeof(SPlong); break;
+			case BMT_TAG_FLOAT: BMT_READ_GENERIC(&node->payload.tag_float, sizeof(SPfloat), _bmt_swapped_memcpy, return SP_FALSE); node->length = sizeof(SPfloat); break;
+			case BMT_TAG_DOUBLE: BMT_READ_GENERIC(&node->payload.tag_double, sizeof(SPdouble), _bmt_swapped_memcpy, return SP_FALSE); node->length = sizeof(SPdouble); break;
+			case BMT_TAG_STRING:
 			{
-				MT3_READ_GENERIC(&node->length, sizeof(SPlong), _mt3_swapped_memcpy, return SP_FALSE);
-				MT3_CHECKED_CALLOC(node->payload.tag_string, node->length + 1, sizeof(SPbyte), return SP_FALSE);
-				MT3_READ_GENERIC(node->payload.tag_string, node->length, _mt3_memcpy, return SP_FALSE);
+				BMT_READ_GENERIC(&node->length, sizeof(SPlong), _bmt_swapped_memcpy, return SP_FALSE);
+				BMT_CHECKED_CALLOC(node->payload.tag_string, node->length + 1, sizeof(SPbyte), return SP_FALSE);
+				BMT_READ_GENERIC(node->payload.tag_string, node->length, _bmt_memcpy, return SP_FALSE);
 				node->payload.tag_string[node->length] = 0;
 				break;
 			}
-			case MT3_TAG_ROOT:
+			case BMT_TAG_ROOT:
 			{
-				node->payload.tag_object = _mt3_decode_tree(memory, length);
+				node->payload.tag_object = _bmt_decode_tree(memory, length);
 				break;
 			}
 			
 			default:
 			{
-                		_mt3_decode_list(node, memory, length);
+                		_bmt_decode_list(node, memory, length);
 				break;
 			}
 		}
@@ -358,34 +358,34 @@ static SPbool _mt3_decode(MT3_node node, const SPubyte** memory, SPsize* length)
 	return SP_TRUE;
 }
 
-MT3_node _mt3_decode_tree(const SPubyte** memory, SPsize* length)
+BMT_node _bmt_decode_tree(const SPubyte** memory, SPsize* length)
 {
 	SPubyte tag;
-	MT3_READ_GENERIC(&tag, sizeof(SPubyte), _mt3_memcpy, return NULL);
+	BMT_READ_GENERIC(&tag, sizeof(SPubyte), _bmt_memcpy, return NULL);
 	
 	SPbool redness = (tag >> 6) & 1;
 	tag &= ~0x40;
-	SP_ASSERT(((tag & ~MT3_TAG_LIST) <= MT3_TAG_MAX), "Invalid tag has been found (stopping)");
+	SP_ASSERT(((tag & ~BMT_TAG_LIST) <= BMT_TAG_MAX), "Invalid tag has been found (stopping)");
 		
-	if(tag == MT3_TAG_NULL)
+	if(tag == BMT_TAG_NULL)
 		return NULL;
 
-	MT3_node tree;
-	MT3_CHECKED_CALLOC(tree, 1, sizeof(struct _MT3_node), return NULL);
+	BMT_node tree;
+	BMT_CHECKED_CALLOC(tree, 1, sizeof(struct _BMT_node), return NULL);
 	
-	MT3_READ_GENERIC(&tree->nameLength, sizeof(SPubyte), _mt3_memcpy, return NULL);
-	MT3_CHECKED_CALLOC(tree->name, tree->nameLength + 1, sizeof(SPchar), return NULL);
-	MT3_READ_GENERIC(tree->name, tree->nameLength, _mt3_memcpy, return NULL);
+	BMT_READ_GENERIC(&tree->nameLength, sizeof(SPubyte), _bmt_memcpy, return NULL);
+	BMT_CHECKED_CALLOC(tree->name, tree->nameLength + 1, sizeof(SPchar), return NULL);
+	BMT_READ_GENERIC(tree->name, tree->nameLength, _bmt_memcpy, return NULL);
 	tree->name[tree->nameLength] = 0;
 
 	tree->red = redness;
 	tree->tag = tag;
 	
-	if(!_mt3_decode(tree, memory, length))
+	if(!_bmt_decode(tree, memory, length))
 		return NULL;
 
-	tree->major = _mt3_decode_tree(memory, length);
-	tree->minor = _mt3_decode_tree(memory, length);
+	tree->major = _bmt_decode_tree(memory, length);
+	tree->minor = _bmt_decode_tree(memory, length);
 
 	if(tree->major)
 		tree->major->parent = tree;
@@ -396,49 +396,49 @@ MT3_node _mt3_decode_tree(const SPubyte** memory, SPsize* length)
 }
 
 
-SPbool _mt3_decode_list(MT3_node node, const SPubyte** memory, SPsize* length)
+SPbool _bmt_decode_list(BMT_node node, const SPubyte** memory, SPsize* length)
 {
     if(!node)
         return SP_FALSE;
 
-    MT3_READ_GENERIC(&node->length, sizeof(SPlong), _mt3_swapped_memcpy, return SP_FALSE);
+    BMT_READ_GENERIC(&node->length, sizeof(SPlong), _bmt_swapped_memcpy, return SP_FALSE);
     if(node->length)
     {
-        MT3_node array = mt3_AllocList();
-        MT3_node cursor = array;
+        BMT_node array = bmt_AllocList();
+        BMT_node cursor = array;
 
         for(SPsize i = 0; i < node->length; i++)
         {
             SPubyte tag;
             SPbool redness = SP_FALSE;
-            if(node->tag == MT3_TAG_LIST)
+            if(node->tag == BMT_TAG_LIST)
             {
-                MT3_READ_GENERIC(&tag, sizeof(SPbyte), _mt3_memcpy, return SP_FALSE);
+                BMT_READ_GENERIC(&tag, sizeof(SPbyte), _bmt_memcpy, return SP_FALSE);
                 redness = (tag >> 6) & 1;
                 if(!redness)
                 {
-                    mt3_Delete(&array);
+                    bmt_Delete(&array);
                     return SP_FALSE;
                 }
                 tag &= ~0x40;
             }
             else
             {
-                tag = node->tag & ~MT3_TAG_LIST;
+                tag = node->tag & ~BMT_TAG_LIST;
                 redness = SP_TRUE;
             }
 
             cursor->tag = tag;
             cursor->red = redness;
 
-            if(!_mt3_decode(cursor, memory, length))
+            if(!_bmt_decode(cursor, memory, length))
             {
-                mt3_Delete(&array);
+                bmt_Delete(&array);
                 return SP_FALSE;
             }
             
-            cursor->major = mt3_AllocList();
-            MT3_node minor = cursor;
+            cursor->major = bmt_AllocList();
+            BMT_node minor = cursor;
             cursor = cursor->major;
             cursor->minor = minor;
         }
@@ -452,11 +452,11 @@ SPbool _mt3_decode_list(MT3_node node, const SPubyte** memory, SPsize* length)
     return SP_TRUE;
 }
 
-MT3_node mt3_DecodeTree(SPbuffer buffer)
+BMT_node bmt_DecodeTree(SPbuffer buffer)
 {
-	SPbuffer decompressed = _mt3_decompress(buffer.data, buffer.length);
+	SPbuffer decompressed = _bmt_decompress(buffer.data, buffer.length);
 	const SPubyte* memory = decompressed.data;
-	MT3_node ret = _mt3_decode_tree((const SPubyte**) &memory, &decompressed.length);
+	BMT_node ret = _bmt_decode_tree((const SPubyte**) &memory, &decompressed.length);
 	spBufferFree(&decompressed);
 	return ret;
 }

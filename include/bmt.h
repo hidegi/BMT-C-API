@@ -20,8 +20,8 @@
  * 3. This notice may not be removed or altered from any source
  * distribution.
  ****************************************************************************/
-#ifndef MT3_PUBLIC_INTERFACE_H
-#define MT3_PUBLIC_INTERFACE_H
+#ifndef BMT_PUBLIC_INTERFACE_H
+#define BMT_PUBLIC_INTERFACE_H
 
 #include "platform.h"
 #include "types.h"
@@ -39,49 +39,49 @@ extern "C" {
 typedef enum
 {
 	/// Plain-type tags.
-	MT3_TAG_NULL 	= 0,
-	MT3_TAG_ROOT    = 1,
-	MT3_TAG_BYTE    = 2,
-	MT3_TAG_SHORT   = 3,
-	MT3_TAG_INT     = 4,
-	MT3_TAG_LONG    = 5,
-	MT3_TAG_FLOAT 	= 6,
-	MT3_TAG_DOUBLE  = 7,
-	MT3_TAG_STRING 	= 8,
-	MT3_TAG_MAX 	= MT3_TAG_STRING,
+	BMT_TAG_NULL 	= 0,
+	BMT_TAG_ROOT    = 1,
+	BMT_TAG_BYTE    = 2,
+	BMT_TAG_SHORT   = 3,
+	BMT_TAG_INT     = 4,
+	BMT_TAG_LONG    = 5,
+	BMT_TAG_FLOAT 	= 6,
+	BMT_TAG_DOUBLE  = 7,
+	BMT_TAG_STRING 	= 8,
+	BMT_TAG_MAX 	= BMT_TAG_STRING,
 	
-	MT3_TAG_LIST	= 0x80,
+	BMT_TAG_LIST	= 0x80,
 	
 	/// List-type tags.
-	MT3_TAG_ROOT_LIST   = MT3_TAG_LIST | MT3_TAG_ROOT,
-	MT3_TAG_BYTE_LIST   = MT3_TAG_LIST | MT3_TAG_BYTE,
-	MT3_TAG_SHORT_LIST  = MT3_TAG_LIST | MT3_TAG_SHORT,
-	MT3_TAG_INT_LIST    = MT3_TAG_LIST | MT3_TAG_INT,
-	MT3_TAG_LONG_LIST   = MT3_TAG_LIST | MT3_TAG_LONG,
-	MT3_TAG_FLOAT_LIST  = MT3_TAG_LIST | MT3_TAG_FLOAT,
-	MT3_TAG_DOUBLE_LIST = MT3_TAG_LIST | MT3_TAG_DOUBLE,
-	MT3_TAG_STRING_LIST = MT3_TAG_LIST | MT3_TAG_STRING
-} MT3_tag;
+	BMT_TAG_ROOT_LIST   = BMT_TAG_LIST | BMT_TAG_ROOT,
+	BMT_TAG_BYTE_LIST   = BMT_TAG_LIST | BMT_TAG_BYTE,
+	BMT_TAG_SHORT_LIST  = BMT_TAG_LIST | BMT_TAG_SHORT,
+	BMT_TAG_INT_LIST    = BMT_TAG_LIST | BMT_TAG_INT,
+	BMT_TAG_LONG_LIST   = BMT_TAG_LIST | BMT_TAG_LONG,
+	BMT_TAG_FLOAT_LIST  = BMT_TAG_LIST | BMT_TAG_FLOAT,
+	BMT_TAG_DOUBLE_LIST = BMT_TAG_LIST | BMT_TAG_DOUBLE,
+	BMT_TAG_STRING_LIST = BMT_TAG_LIST | BMT_TAG_STRING
+} BMT_tag;
 
 typedef enum
 {
-	MT3_STATUS_OK = 0, 	/// No errors.
-	MT3_STATUS_NO_MEMORY, 	/// Out of memory.
-	MT3_STATUS_READ_ERROR,	/// Read error.
-	MT3_STATUS_WRITE_ERROR,	/// Write error.
-	MT3_STATUS_BAD_NAME,	/// Bad name, either taken, empty or null.
-	MT3_STATUS_BAD_VALUE,	/// Invalid value.
-	MT3_STATUS_NOT_A_TREE,  /// Given node is not a tree.
-	MT3_STATUS_NOT_A_LIST,  /// Given node is not a list.
-	MT3_STATUS_BAD_TAG,	/// Invalid tag.
-} MT3_status;
+	BMT_STATUS_OK = 0, 	/// No errors.
+	BMT_STATUS_NO_MEMORY, 	/// Out of memory.
+	BMT_STATUS_READ_ERROR,	/// Read error.
+	BMT_STATUS_WRITE_ERROR,	/// Write error.
+	BMT_STATUS_BAD_NAME,	/// Bad name, either taken, empty or null.
+	BMT_STATUS_BAD_VALUE,	/// Invalid value.
+	BMT_STATUS_NOT_A_TREE,  /// Given node is not a tree.
+	BMT_STATUS_NOT_A_LIST,  /// Given node is not a list.
+	BMT_STATUS_BAD_TAG,	/// Invalid tag.
+} BMT_status;
 
-struct _MT3_node
+struct _BMT_node
 {	
 	// Do not modify these members directly!
 	// (Causes undefined behaviour)
 	SPhash weight;
-	MT3_tag tag;
+	BMT_tag tag;
 	
 	SPubyte nameLength; // Name should not exceed 255 characters.
 	SPchar* name; // The name of the node.
@@ -89,9 +89,9 @@ struct _MT3_node
 	SPsize length; // The length of the payload in bytes.
 	
 	SPbool red; // Signals the node's color, encoded in the 7th bit of the tag.
-	struct _MT3_node* parent;
-	struct _MT3_node* major;
-	struct _MT3_node* minor; 
+	struct _BMT_node* parent;
+	struct _BMT_node* major;
+	struct _BMT_node* minor; 
 	
 	union
 	{
@@ -104,36 +104,36 @@ struct _MT3_node
 		SPfloat tag_float;
 		SPdouble tag_double;
 		SPchar* tag_string;
-		struct _MT3_node* tag_object; // For all list-types and trees.
+		struct _BMT_node* tag_object; // For all list-types and trees.
 	} payload;
 };
-typedef struct _MT3_node* MT3_node;
+typedef struct _BMT_node* BMT_node;
 
 /*!
  *	@brief Allocates a tree-node.
  *
  *	The returned node will be black-coded and 
- *	will have a tag of MT3_TAG_NULL.
+ *	will have a tag of BMT_TAG_NULL.
  *	
  *	@return The newly allocated tree, otherwise NULL,
  *	if failing to reserve memory.
  *
  *	@ingroup allocation
  */
-SP_API MT3_node mt3_AllocTree();
+SP_API BMT_node bmt_AllocTree();
 
 /*!
  *	@brief Allocates a list-node.
  *
  *	The returned node will be red-coded and 
- *	will have a tag of MT3_TAG_NULL.
+ *	will have a tag of BMT_TAG_NULL.
  *	
  *	@return The newly allocated list, otherwise NULL,
  *	if failing to reserve memory.
  *
  *	@ingroup allocation
  */
-SP_API MT3_node mt3_AllocList();
+SP_API BMT_node bmt_AllocList();
 
 /*!
  *	@brief Dumps an object to a human-readable string.
@@ -146,22 +146,22 @@ SP_API MT3_node mt3_AllocList();
  *
  *	For list-nodes, each element will be shown line by line.
  *
- *	Issues @ref MT3_STATUS_BAD_VALUE, 
+ *	Issues @ref BMT_STATUS_BAD_VALUE, 
  *	if @param object is not a head-node.
  *	
  *	@return The output string.
  *
  *	@ingroup debug
  */
-SP_API const SPchar* mt3_ToString(const MT3_node object);
+SP_API const SPchar* bmt_ToString(const BMT_node object);
 
 /*!
- *	@brief Same as @ref mt3_ToString, but prints the output
+ *	@brief Same as @ref bmt_ToString, but prints the output
  *	to the standard output stream.
  *
  *	@ingroup debug
  */
-SP_API void mt3_Print(const MT3_node object);
+SP_API void bmt_Print(const BMT_node object);
 
 /*!
  *	@brief Compares the tag, colour, value and
@@ -172,19 +172,19 @@ SP_API void mt3_Print(const MT3_node object);
  *
  *	@ingroup comparison
  */
-SP_API SPbool mt3_IsEqual(const MT3_node a, const MT3_node b);
+SP_API SPbool bmt_IsEqual(const BMT_node a, const BMT_node b);
 
 /*!
  *	@brief Copies a tree-or list-node.
  *	
- *	Issues @ref MT3_STATUS_BAD_VALUE, 
+ *	Issues @ref BMT_STATUS_BAD_VALUE, 
  *	if @param object is not a head-node.
  *	
  *	@return The newly copied node.
  *	
  *	@ingroup copying
  */
-SP_API MT3_node mt3_Copy(const MT3_node object);
+SP_API BMT_node bmt_Copy(const BMT_node object);
 
 /*!
  *	@brief Tells whether or not @param tree is a tree-node.
@@ -197,288 +197,288 @@ SP_API MT3_node mt3_Copy(const MT3_node object);
  *	
  *	@ingroup tree-validation
  */
-SP_API SPbool mt3_IsTree(const MT3_node tree);
+SP_API SPbool bmt_IsTree(const BMT_node tree);
 
 /*!
  *	@brief Inserts an empty tree-node to the given tree.
  *	If @param tree points to NULL, a new tree will be created.
  *	
- *	Issues @ref MT3_STATUS_BAD_VALUE, if @param tree is NULL.
+ *	Issues @ref BMT_STATUS_BAD_VALUE, if @param tree is NULL.
  *
- *	Issues @ref MT3_STATUS_NOT_A_TREE, if the object pointed
+ *	Issues @ref BMT_STATUS_NOT_A_TREE, if the object pointed
  *	to by @param tree is not NULL and not a tree.
  *
- *	Issues @ref MT3_STATUS_BAD_NAME, if @param name is NULL,
+ *	Issues @ref BMT_STATUS_BAD_NAME, if @param name is NULL,
  *	empty or already taken.
  *	
  *	@ingroup tree-insertion
  */
-SP_API void mt3_CreateTree(MT3_node* tree, const SPchar* name);
+SP_API void bmt_CreateTree(BMT_node* tree, const SPchar* name);
 
 /*!
  *	@brief Inserts an empty list-node to the given tree.
  *	If @param tree points to NULL, a new tree will be created.
  *	
- *	Issues @ref MT3_STATUS_BAD_VALUE, if @param tree is NULL.
+ *	Issues @ref BMT_STATUS_BAD_VALUE, if @param tree is NULL.
  *
- *	Issues @ref MT3_STATUS_NOT_A_TREE, if the object pointed
+ *	Issues @ref BMT_STATUS_NOT_A_TREE, if the object pointed
  *	to by @param tree is not NULL and not a tree.
  *
- *	Issues @ref MT3_STATUS_BAD_NAME, if @param name is NULL,
+ *	Issues @ref BMT_STATUS_BAD_NAME, if @param name is NULL,
  *	empty or already taken.
  *	
  *	@ingroup tree-insertion
  */ 
-SP_API void mt3_CreateList(MT3_node* tree, const SPchar* name);
+SP_API void bmt_CreateList(BMT_node* tree, const SPchar* name);
 
 /*!
  *	@brief Inserts a tree-or list-node to the given tree.
  *	If @param tree points to NULL, a new tree will be created.
  *	
- *	Issues @ref MT3_STATUS_BAD_VALUE, if @param tree is NULL.
+ *	Issues @ref BMT_STATUS_BAD_VALUE, if @param tree is NULL.
  *
- *	Issues @ref MT3_STATUS_NOT_A_TREE, if the object pointed
+ *	Issues @ref BMT_STATUS_NOT_A_TREE, if the object pointed
  *	to by @param tree is not NULL and not a tree.
  *
- *	Issues @ref MT3_STATUS_BAD_NAME, if @param name is NULL,
+ *	Issues @ref BMT_STATUS_BAD_NAME, if @param name is NULL,
  *	empty or already taken.
  *	
  *	@ingroup tree-insertion
  */
-SP_API void mt3_Insert(MT3_node* tree, const SPchar* name, const MT3_node value);
+SP_API void bmt_Insert(BMT_node* tree, const SPchar* name, const BMT_node value);
 
 /*!
  *	@brief Inserts a byte-node to the given tree.
  *	If @param tree points to NULL, a new tree will be created.
  *	
- *	Issues @ref MT3_STATUS_BAD_VALUE, if @param tree is NULL.
+ *	Issues @ref BMT_STATUS_BAD_VALUE, if @param tree is NULL.
  *
- *	Issues @ref MT3_STATUS_NOT_A_TREE, if the object pointed
+ *	Issues @ref BMT_STATUS_NOT_A_TREE, if the object pointed
  *	to by @param tree is not NULL and not a tree.
  *
- *	Issues @ref MT3_STATUS_BAD_NAME, if @param name is NULL,
+ *	Issues @ref BMT_STATUS_BAD_NAME, if @param name is NULL,
  *	empty or already taken.
  *
  *	@ingroup tree-insertion
  */
-SP_API void mt3_InsertByte(MT3_node* tree, const SPchar* name, SPbyte value);
+SP_API void bmt_InsertByte(BMT_node* tree, const SPchar* name, SPbyte value);
 
 /*!
  *	@brief Inserts a short-node to the given tree.
  *	If @param tree points to NULL, a new tree will be created.
  *	
- *	Issues @ref MT3_STATUS_BAD_VALUE, if @param tree is NULL.
+ *	Issues @ref BMT_STATUS_BAD_VALUE, if @param tree is NULL.
  *
- *	Issues @ref MT3_STATUS_NOT_A_TREE, if the object pointed
+ *	Issues @ref BMT_STATUS_NOT_A_TREE, if the object pointed
  *	to by @param tree is not NULL and not a tree.
  *
- *	Issues @ref MT3_STATUS_BAD_NAME, if @param name is NULL,
+ *	Issues @ref BMT_STATUS_BAD_NAME, if @param name is NULL,
  *	empty or already taken.
  *
  *	@ingroup tree-insertion
  */
-SP_API void mt3_InsertShort(MT3_node* tree, const SPchar* name, SPshort value);
+SP_API void bmt_InsertShort(BMT_node* tree, const SPchar* name, SPshort value);
 
 /*!
  *	@brief Inserts an int-node to the given tree.
  *	If @param tree points to NULL, a new tree will be created.
  *
- *	Issues @ref MT3_STATUS_BAD_VALUE, if @param tree is NULL.
+ *	Issues @ref BMT_STATUS_BAD_VALUE, if @param tree is NULL.
  *
- *	Issues @ref MT3_STATUS_NOT_A_TREE, if the object pointed
+ *	Issues @ref BMT_STATUS_NOT_A_TREE, if the object pointed
  *	to by @param tree is not NULL and not a tree.
  *
- *	Issues @ref MT3_STATUS_BAD_NAME, if @param name is NULL,
+ *	Issues @ref BMT_STATUS_BAD_NAME, if @param name is NULL,
  *	empty or already taken.
  *
  *	@ingroup tree-insertion
  */
-SP_API void mt3_InsertInt(MT3_node* tree, const SPchar* name, SPint value);
+SP_API void bmt_InsertInt(BMT_node* tree, const SPchar* name, SPint value);
 
 /*!
  *	@brief Inserts a long-node to the given tree.
  *	If @param tree points to NULL, a new tree will be created.
  *
- *	Issues @ref MT3_STATUS_BAD_VALUE, if @param tree is NULL.
+ *	Issues @ref BMT_STATUS_BAD_VALUE, if @param tree is NULL.
  *
- *	Issues @ref MT3_STATUS_NOT_A_TREE, if the object pointed
+ *	Issues @ref BMT_STATUS_NOT_A_TREE, if the object pointed
  *	to by @param tree is not NULL and not a tree.
  *
- *	Issues @ref MT3_STATUS_BAD_NAME, if @param name is NULL,
+ *	Issues @ref BMT_STATUS_BAD_NAME, if @param name is NULL,
  *	empty or already taken.
  *
  *	@ingroup tree-insertion
  */
-SP_API void mt3_InsertLong(MT3_node* tree, const SPchar* name, SPlong value);
+SP_API void bmt_InsertLong(BMT_node* tree, const SPchar* name, SPlong value);
 
 /*!
  *	@brief Inserts a float-node to the given tree.
  *	If @param tree points to NULL, a new tree will be created.
  *	
- *	Issues @ref MT3_STATUS_BAD_VALUE, if @param tree is NULL.
+ *	Issues @ref BMT_STATUS_BAD_VALUE, if @param tree is NULL.
  *
- *	Issues @ref MT3_STATUS_NOT_A_TREE, if the object pointed
+ *	Issues @ref BMT_STATUS_NOT_A_TREE, if the object pointed
  *	to by @param tree is not NULL and not a tree.
  *
- *	Issues @ref MT3_STATUS_BAD_NAME, if @param name is NULL,
+ *	Issues @ref BMT_STATUS_BAD_NAME, if @param name is NULL,
  *	empty or already taken.
  *
  *	@ingroup tree-insertion
  */
-SP_API void mt3_InsertFloat(MT3_node* tree, const SPchar* name, SPfloat value);
+SP_API void bmt_InsertFloat(BMT_node* tree, const SPchar* name, SPfloat value);
 
 /*!
  *	@brief Inserts a double-node to the given tree.
  *	If @param tree points to NULL, a new tree will be created.
  *
- *	Issues @ref MT3_STATUS_BAD_VALUE, if @param tree is NULL.
+ *	Issues @ref BMT_STATUS_BAD_VALUE, if @param tree is NULL.
  *
- *	Issues @ref MT3_STATUS_NOT_A_TREE, if the object pointed
+ *	Issues @ref BMT_STATUS_NOT_A_TREE, if the object pointed
  *	to by @param tree is not NULL and not a tree.
  *
- *	Issues @ref MT3_STATUS_BAD_NAME, if @param name is NULL,
+ *	Issues @ref BMT_STATUS_BAD_NAME, if @param name is NULL,
  *	empty or already taken.
  *
  *	@ingroup tree-insertion
  */
-SP_API void mt3_InsertDouble(MT3_node* tree, const SPchar* name, SPdouble value);
+SP_API void bmt_InsertDouble(BMT_node* tree, const SPchar* name, SPdouble value);
 
 /*!
  *	@brief Inserts a string-node to the given tree.
  *	If @param tree points to NULL, a new tree will be created.
  *
- *	Issues @ref MT3_STATUS_BAD_VALUE, if @param tree is NULL.
+ *	Issues @ref BMT_STATUS_BAD_VALUE, if @param tree is NULL.
  *
- *	Issues @ref MT3_STATUS_NOT_A_TREE, if the object pointed
+ *	Issues @ref BMT_STATUS_NOT_A_TREE, if the object pointed
  *	to by @param tree is not NULL and not a tree.
  *
- *	Issues @ref MT3_STATUS_BAD_NAME, if @param name is NULL,
+ *	Issues @ref BMT_STATUS_BAD_NAME, if @param name is NULL,
  *	empty or already taken.
  *
- *	Issues @ref MT3_STATUS_BAD_VALUE, if @param value is NULL.
+ *	Issues @ref BMT_STATUS_BAD_VALUE, if @param value is NULL.
  *	
  *	@ingroup tree-insertion
  */
-SP_API void mt3_InsertString(MT3_node* tree, const SPchar* name, const SPchar* value);
+SP_API void bmt_InsertString(BMT_node* tree, const SPchar* name, const SPchar* value);
 
 /*!
  *	@brief Inserts a byte-list-node to the given tree.
  *	If @param tree points to NULL, a new tree will be created.
  *	A linked list will be implicitly created from @param values.
  *	
- *	Issues @ref MT3_STATUS_BAD_VALUE, if @param tree is NULL.
+ *	Issues @ref BMT_STATUS_BAD_VALUE, if @param tree is NULL.
  *
- *	Issues @ref MT3_STATUS_NOT_A_TREE, if the object pointed
+ *	Issues @ref BMT_STATUS_NOT_A_TREE, if the object pointed
  *	to by @param tree is not NULL and not a tree.
  *
- *	Issues @ref MT3_STATUS_BAD_NAME, if @param name is NULL,
+ *	Issues @ref BMT_STATUS_BAD_NAME, if @param name is NULL,
  *	empty or already taken.
  *
- *	Issues @ref MT3_STATUS_BAD_VALUE, if @param value is NULL,
+ *	Issues @ref BMT_STATUS_BAD_VALUE, if @param value is NULL,
  *	or @param length is less-equal to zero.
  *
  *	@ingroup tree-insertion
  */
-SP_API void mt3_InsertByteList(MT3_node* tree, const SPchar* name, SPsize length, const SPbyte* values);
+SP_API void bmt_InsertByteList(BMT_node* tree, const SPchar* name, SPsize length, const SPbyte* values);
 
 /*!
  *	@brief Inserts a short-list-node to the given tree.
  *	If @param tree points to NULL, a new tree will be created.
  *	A linked list will be implicitly created from @param values.
  *
- *	Issues @ref MT3_STATUS_BAD_VALUE, if @param tree is NULL.
+ *	Issues @ref BMT_STATUS_BAD_VALUE, if @param tree is NULL.
  *
- *	Issues @ref MT3_STATUS_NOT_A_TREE, if the object pointed
+ *	Issues @ref BMT_STATUS_NOT_A_TREE, if the object pointed
  *	to by @param tree is not NULL and not a tree.
  *
- *	Issues @ref MT3_STATUS_BAD_NAME, if @param name is NULL,
+ *	Issues @ref BMT_STATUS_BAD_NAME, if @param name is NULL,
  *	empty or already taken.
  *
- *	Issues @ref MT3_STATUS_BAD_VALUE, if @param value is NULL,
+ *	Issues @ref BMT_STATUS_BAD_VALUE, if @param value is NULL,
  *	or @param length is less-equal to zero.
  *
  *	@ingroup tree-insertion
  */
-SP_API void mt3_InsertShortList(MT3_node* tree, const SPchar* name, SPsize length, const SPshort* values);
+SP_API void bmt_InsertShortList(BMT_node* tree, const SPchar* name, SPsize length, const SPshort* values);
 
 /*!
  *	@brief Inserts an int-list-node to the given tree.
  *	If @param tree points to NULL, a new tree will be created.
  *	
- *	Issues @ref MT3_STATUS_BAD_VALUE, if @param tree is NULL.
+ *	Issues @ref BMT_STATUS_BAD_VALUE, if @param tree is NULL.
  *
- *	Issues @ref MT3_STATUS_NOT_A_TREE, if the object pointed
+ *	Issues @ref BMT_STATUS_NOT_A_TREE, if the object pointed
  *	to by @param tree is not NULL and not a tree.
  *
- *	Issues @ref MT3_STATUS_BAD_NAME, if @param name is NULL,
+ *	Issues @ref BMT_STATUS_BAD_NAME, if @param name is NULL,
  *	empty or already taken.
  *
- *	Issues @ref MT3_STATUS_BAD_VALUE, if @param value is NULL,
+ *	Issues @ref BMT_STATUS_BAD_VALUE, if @param value is NULL,
  *	or @param length is less-equal to zero.
  *
  *	@ingroup tree-insertion
  */
-SP_API void mt3_InsertIntList(MT3_node* tree, const SPchar* name, SPsize length, const SPint* values);
+SP_API void bmt_InsertIntList(BMT_node* tree, const SPchar* name, SPsize length, const SPint* values);
 
 /*!
  *	@brief Inserts a long-list-node to the given tree.
  *	If @param tree points to NULL, a new tree will be created.
  *	A linked list will be implicitly created from @param values.
  * 
- *	Issues @ref MT3_STATUS_BAD_VALUE, if @param tree is NULL.
+ *	Issues @ref BMT_STATUS_BAD_VALUE, if @param tree is NULL.
  *
- *	Issues @ref MT3_STATUS_NOT_A_TREE, if the object pointed
+ *	Issues @ref BMT_STATUS_NOT_A_TREE, if the object pointed
  *	to by @param tree is not NULL and not a tree.
  *
- *	Issues @ref MT3_STATUS_BAD_NAME, if @param name is NULL,
+ *	Issues @ref BMT_STATUS_BAD_NAME, if @param name is NULL,
  *	empty or already taken.
  *
- *	Issues @ref MT3_STATUS_BAD_VALUE, if @param value is NULL,
+ *	Issues @ref BMT_STATUS_BAD_VALUE, if @param value is NULL,
  *	or @param length is less-equal to zero.
  *
  *	@ingroup tree-insertion
  */
-SP_API void mt3_InsertLongList(MT3_node* tree, const SPchar* name, SPsize length, const SPlong* values);
+SP_API void bmt_InsertLongList(BMT_node* tree, const SPchar* name, SPsize length, const SPlong* values);
 
 /*!
  *	@brief Inserts a float-list-node to the given tree.
  *	If @param tree points to NULL, a new tree will be created.
  *	A linked list will be implicitly created from @param values.
  *
- *	Issues @ref MT3_STATUS_BAD_VALUE, if @param tree is NULL.
+ *	Issues @ref BMT_STATUS_BAD_VALUE, if @param tree is NULL.
  *
- *	Issues @ref MT3_STATUS_NOT_A_TREE, if the object pointed
+ *	Issues @ref BMT_STATUS_NOT_A_TREE, if the object pointed
  *	to by @param tree is not NULL and not a tree.
  *
- *	Issues @ref MT3_STATUS_BAD_NAME, if @param name is NULL,
+ *	Issues @ref BMT_STATUS_BAD_NAME, if @param name is NULL,
  *	empty or already taken.
  *
- *	Issues @ref MT3_STATUS_BAD_VALUE, if @param value is NULL,
+ *	Issues @ref BMT_STATUS_BAD_VALUE, if @param value is NULL,
  *	or @param length is less-equal to zero.
  *
  *	@ingroup tree-insertion
  */
-SP_API void mt3_InsertFloatList(MT3_node* tree, const SPchar* name, SPsize length, const SPfloat* values);
+SP_API void bmt_InsertFloatList(BMT_node* tree, const SPchar* name, SPsize length, const SPfloat* values);
 
 /*!
  *	@brief Inserts a double-list-node to the given tree.
  *	If @param tree points to NULL, a new tree will be created.
  *	A linked list will be implicitly created from @param values.
  *
- *	Issues @ref MT3_STATUS_BAD_VALUE, if @param tree is NULL.
+ *	Issues @ref BMT_STATUS_BAD_VALUE, if @param tree is NULL.
  *
- *	Issues @ref MT3_STATUS_NOT_A_TREE, if the object pointed
+ *	Issues @ref BMT_STATUS_NOT_A_TREE, if the object pointed
  *	to by @param tree is not NULL and not a tree.
  *
- *	Issues @ref MT3_STATUS_BAD_NAME, if @param name is NULL,
+ *	Issues @ref BMT_STATUS_BAD_NAME, if @param name is NULL,
  *	empty or already taken.
  *
- *	Issues @ref MT3_STATUS_BAD_VALUE, if @param value is NULL,
+ *	Issues @ref BMT_STATUS_BAD_VALUE, if @param value is NULL,
  *	or @param length is less-equal to zero.
  *
  *	@ingroup tree-insertion
  */
-SP_API void mt3_InsertDoubleList(MT3_node* tree, const SPchar* name, SPsize length, const SPdouble* values);
+SP_API void bmt_InsertDoubleList(BMT_node* tree, const SPchar* name, SPsize length, const SPdouble* values);
 
 /*!
  *	@brief Inserts a string-list-node to the given tree.
@@ -486,20 +486,20 @@ SP_API void mt3_InsertDoubleList(MT3_node* tree, const SPchar* name, SPsize leng
  *	A linked list will be implicitly created from @param values.
  *	Note that NULL-strings will be ignored.
  *
- *	Issues @ref MT3_STATUS_BAD_VALUE, if @param tree is NULL.
+ *	Issues @ref BMT_STATUS_BAD_VALUE, if @param tree is NULL.
  *
- *	Issues @ref MT3_STATUS_NOT_A_TREE, if the object pointed
+ *	Issues @ref BMT_STATUS_NOT_A_TREE, if the object pointed
  *	to by @param tree is not NULL and not a tree.
  *
- *	Issues @ref MT3_STATUS_BAD_NAME, if @param name is NULL,
+ *	Issues @ref BMT_STATUS_BAD_NAME, if @param name is NULL,
  *	empty or already taken.
  *
- *	Issues @ref MT3_STATUS_BAD_VALUE, if @param value is NULL,
+ *	Issues @ref BMT_STATUS_BAD_VALUE, if @param value is NULL,
  *	or @param length is less-equal to zero.
  *
  *	@ingroup tree-insertion
  */
-SP_API void mt3_InsertStringList(MT3_node* tree, const SPchar* name, SPsize length, const SPchar** values);
+SP_API void bmt_InsertStringList(BMT_node* tree, const SPchar* name, SPsize length, const SPchar** values);
 
 /*!
  *	@brief Returns the value stored in any integer-type nodes
@@ -512,7 +512,7 @@ SP_API void mt3_InsertStringList(MT3_node* tree, const SPchar* name, SPsize leng
  *
  *	@ingroup tree-getters
  */
-SP_API SPlong mt3_GetNumber(const MT3_node tree, const SPchar* name);
+SP_API SPlong bmt_GetNumber(const BMT_node tree, const SPchar* name);
 
 /*!
  *	@brief Returns the value stored in any floating-type nodes
@@ -525,7 +525,7 @@ SP_API SPlong mt3_GetNumber(const MT3_node tree, const SPchar* name);
  *
  *	@ingroup tree-getters
  */
-SP_API SPdouble mt3_GetDecimal(const MT3_node tree, const SPchar* name);
+SP_API SPdouble bmt_GetDecimal(const BMT_node tree, const SPchar* name);
 
 /*!
  *	@brief Returns the value stored in a byte-node
@@ -538,7 +538,7 @@ SP_API SPdouble mt3_GetDecimal(const MT3_node tree, const SPchar* name);
  *
  *	@ingroup tree-getters
  */
-SP_API SPbyte mt3_GetByte(const MT3_node tree, const SPchar* name);
+SP_API SPbyte bmt_GetByte(const BMT_node tree, const SPchar* name);
 
 /*!
  *	@brief Returns the value stored in a short-node
@@ -551,7 +551,7 @@ SP_API SPbyte mt3_GetByte(const MT3_node tree, const SPchar* name);
  *
  *	@ingroup tree-getters
  */
-SP_API SPshort mt3_GetShort(const MT3_node tree, const SPchar* name);
+SP_API SPshort bmt_GetShort(const BMT_node tree, const SPchar* name);
 
 /*!
  *	@brief Returns the value stored in an int-node
@@ -564,7 +564,7 @@ SP_API SPshort mt3_GetShort(const MT3_node tree, const SPchar* name);
  *
  *	@ingroup tree-getters
  */
-SP_API SPint mt3_GetInt(const MT3_node tree, const SPchar* name);
+SP_API SPint bmt_GetInt(const BMT_node tree, const SPchar* name);
 
 /*!
  *	@brief Returns the value stored in a long-node
@@ -577,7 +577,7 @@ SP_API SPint mt3_GetInt(const MT3_node tree, const SPchar* name);
  *
  *	@ingroup tree-getters
  */
-SP_API SPlong mt3_GetLong(const MT3_node tree, const SPchar* name);
+SP_API SPlong bmt_GetLong(const BMT_node tree, const SPchar* name);
 
 /*!
  *	@brief Returns the value stored in a float-node
@@ -590,7 +590,7 @@ SP_API SPlong mt3_GetLong(const MT3_node tree, const SPchar* name);
  *
  *	@ingroup tree-getters
  */
-SP_API SPfloat mt3_GetFloat(const MT3_node tree, const SPchar* name);
+SP_API SPfloat bmt_GetFloat(const BMT_node tree, const SPchar* name);
 
 /*!
  *	@brief Returns the value stored in a double-node
@@ -603,7 +603,7 @@ SP_API SPfloat mt3_GetFloat(const MT3_node tree, const SPchar* name);
  *
  *	@ingroup tree-getters
  */
-SP_API SPdouble mt3_GetDouble(const MT3_node tree, const SPchar* name);
+SP_API SPdouble bmt_GetDouble(const BMT_node tree, const SPchar* name);
 
 /*!
  *	@brief Returns the value stored in a string-node
@@ -616,7 +616,7 @@ SP_API SPdouble mt3_GetDouble(const MT3_node tree, const SPchar* name);
  *
  *	@ingroup tree-getters
  */
-SP_API const SPchar* mt3_GetString(const MT3_node tree, const SPchar* name);
+SP_API const SPchar* bmt_GetString(const BMT_node tree, const SPchar* name);
 
 /*!
  *	@brief Returns the object stored in a tree-or list-node.
@@ -629,64 +629,64 @@ SP_API const SPchar* mt3_GetString(const MT3_node tree, const SPchar* name);
  *
  *	@ingroup tree-getters
  */
-SP_API MT3_node mt3_Get(const MT3_node tree, const SPchar* name);
+SP_API BMT_node bmt_Get(const BMT_node tree, const SPchar* name);
 
 /*!
  *	@brief Sets the value stored in a byte-node found by @param name.
  *	@ingroup tree-setters
  */
-SP_API void mt3_SetByte(MT3_node tree, const SPchar* name, SPbyte value);
+SP_API void bmt_SetByte(BMT_node tree, const SPchar* name, SPbyte value);
 
 /*!
  *	@brief Sets the value stored in a short-node found by @param name.
  *	@ingroup tree-setters
  */
-SP_API void mt3_SetShort(MT3_node tree, const SPchar* name, SPshort value);
+SP_API void bmt_SetShort(BMT_node tree, const SPchar* name, SPshort value);
 
 /*!
  *	@brief Sets the value stored in an int-node found by @param name.
  *	@ingroup tree-setters
  */
-SP_API void mt3_SetInt(MT3_node tree, const SPchar* name, SPint value);
+SP_API void bmt_SetInt(BMT_node tree, const SPchar* name, SPint value);
 
 /*!
  *	@brief Sets the value stored in a long-node found by @param name.
  *	@ingroup tree-setters
  */
-SP_API void mt3_SetLong(MT3_node tree, const SPchar* name, SPlong value);
+SP_API void bmt_SetLong(BMT_node tree, const SPchar* name, SPlong value);
 
 /*!
  *	@brief Sets the value stored in a float-node found by @param name.
  *	@ingroup tree-setters
  */
-SP_API void mt3_SetFloat(MT3_node tree, const SPchar* name, SPfloat value);
+SP_API void bmt_SetFloat(BMT_node tree, const SPchar* name, SPfloat value);
 
 /*!
  *	@brief Sets the value stored in a double-node found by @param name.
  *	@ingroup tree-setters
  */
-SP_API void mt3_SetDouble(MT3_node tree, const SPchar* name, SPdouble value);
+SP_API void bmt_SetDouble(BMT_node tree, const SPchar* name, SPdouble value);
 
 /*!
  *	@brief Sets the value stored in a long-node found by @param name.
  *
- *	Issues @ref MT3_STATUS_NO_MEMORY, if failing to copy from @param value.
+ *	Issues @ref BMT_STATUS_NO_MEMORY, if failing to copy from @param value.
  *
  *	@ingroup tree-setters
  */
-SP_API void mt3_SetString(MT3_node tree, const SPchar* name, const SPchar* value);
+SP_API void bmt_SetString(BMT_node tree, const SPchar* name, const SPchar* value);
 
 /*!
  *	@brief Removes a node from a tree.
  *
- *	Issues @ref MT3_STATUS_BAD_VALUE, if @param tree is NULL.
+ *	Issues @ref BMT_STATUS_BAD_VALUE, if @param tree is NULL.
  *
- *	Issues @ref MT3_STATUS_NOT_A_TREE, if the object pointed
+ *	Issues @ref BMT_STATUS_NOT_A_TREE, if the object pointed
  *	to by @param tree is not NULL and not a tree.
  *
  *	@ingroup tree-removal
  */
-SP_API SPbool mt3_Remove(MT3_node* tree, const SPchar* name);
+SP_API SPbool bmt_Remove(BMT_node* tree, const SPchar* name);
 
 /*!
  *	@brief Checks if @param rbt conforms the properties
@@ -698,7 +698,7 @@ SP_API SPbool mt3_Remove(MT3_node* tree, const SPchar* name);
  *	@ingroup tree-validation
  */
  
-SP_API SPbool mt3_IsValidRBT(const MT3_node rbt);
+SP_API SPbool bmt_IsValidRBT(const BMT_node rbt);
 
 /*!
  *	@brief Tells whether or not @param list is a list-node.
@@ -708,7 +708,7 @@ SP_API SPbool mt3_IsValidRBT(const MT3_node rbt);
  *	
  *	@ingroup list-validation
  */
-SP_API SPbool mt3_IsList(const MT3_node list);
+SP_API SPbool bmt_IsList(const BMT_node list);
 
 /*!
  *	@brief Returns the length of @param list.
@@ -718,236 +718,236 @@ SP_API SPbool mt3_IsList(const MT3_node list);
  *	
  *	@ingroup list-insertion
  */
-SP_API SPsize mt3_Length(const MT3_node list);
+SP_API SPsize bmt_Length(const BMT_node list);
 
 /*!
  *	@brief Appends a tree-or list-node to the given list.
  *	If @param list points to NULL, a new list will be created.
  *	 
- *	Issues @ref MT3_STATUS_BAD_VALUE, if @param list is NULL.
+ *	Issues @ref BMT_STATUS_BAD_VALUE, if @param list is NULL.
  *
- *	Issues @ref MT3_STATUS_NOT_A_LIST, if the object pointed
+ *	Issues @ref BMT_STATUS_NOT_A_LIST, if the object pointed
  *	to by @param list is not NULL and not a list.
  *
- *	Issues @ref MT3_STATUS_BAD_VALUE, if @param value
+ *	Issues @ref BMT_STATUS_BAD_VALUE, if @param value
  *	is neither a tree-nor a list-node or NULL.
  *	
  *	@ingroup list-insertion
  */
-SP_API void mt3_Append(MT3_node* list, const MT3_node value);
+SP_API void bmt_Append(BMT_node* list, const BMT_node value);
 
 /*!
  *	@brief Appends a byte-node to the given list.
  *	If @param list points to NULL, a new list will be created.
  *	
- *	Issues @ref MT3_STATUS_BAD_VALUE, if @param list is NULL.
+ *	Issues @ref BMT_STATUS_BAD_VALUE, if @param list is NULL.
  *
- *	Issues @ref MT3_STATUS_NOT_A_TREE, if the object pointed
+ *	Issues @ref BMT_STATUS_NOT_A_TREE, if the object pointed
  *	to by @param list is not NULL and not a list.
  *
  *	@ingroup list-insertion
  */
-SP_API void mt3_AppendByte(MT3_node* list, SPbyte value);
+SP_API void bmt_AppendByte(BMT_node* list, SPbyte value);
 
 /*!
  *	@brief Appends a short-node to the given list.
  *	If @param list points to NULL, a new list will be created.
  *	
- *	Issues @ref MT3_STATUS_BAD_VALUE, if @param list is NULL.
+ *	Issues @ref BMT_STATUS_BAD_VALUE, if @param list is NULL.
  *
- *	Issues @ref MT3_STATUS_NOT_A_TREE, if the object pointed
+ *	Issues @ref BMT_STATUS_NOT_A_TREE, if the object pointed
  *	to by @param list is not NULL and not a list.
  *
  *	@ingroup list-insertion
  */
-SP_API void mt3_AppendShort(MT3_node* list, SPshort value);
+SP_API void bmt_AppendShort(BMT_node* list, SPshort value);
 
 /*!
  *	@brief Appends an int-node to the given list.
  *	If @param list points to NULL, a new list will be created.
  *	
- *	Issues @ref MT3_STATUS_BAD_VALUE, if @param list is NULL.
+ *	Issues @ref BMT_STATUS_BAD_VALUE, if @param list is NULL.
  *
- *	Issues @ref MT3_STATUS_NOT_A_TREE, if the object pointed
+ *	Issues @ref BMT_STATUS_NOT_A_TREE, if the object pointed
  *	to by @param list is not NULL and not a list.
  *
  *	@ingroup list-insertion
  */
-SP_API void mt3_AppendInt(MT3_node* list, SPint value);
+SP_API void bmt_AppendInt(BMT_node* list, SPint value);
 
 /*!
  *	@brief Appends a long-node to the given list.
  *	If @param list points to NULL, a new list will be created.
  *	
- *	Issues @ref MT3_STATUS_BAD_VALUE, if @param list is NULL.
+ *	Issues @ref BMT_STATUS_BAD_VALUE, if @param list is NULL.
  *
- *	Issues @ref MT3_STATUS_NOT_A_TREE, if the object pointed
+ *	Issues @ref BMT_STATUS_NOT_A_TREE, if the object pointed
  *	to by @param list is not NULL and not a list.
  *
  *	@ingroup list-insertion
  */
-SP_API void mt3_AppendLong(MT3_node* list, SPlong value);
+SP_API void bmt_AppendLong(BMT_node* list, SPlong value);
 
 /*!
  *	@brief Appends a float-node to the given list.
  *	If @param list points to NULL, a new list will be created.
  *	
- *	Issues @ref MT3_STATUS_BAD_VALUE, if @param list is NULL.
+ *	Issues @ref BMT_STATUS_BAD_VALUE, if @param list is NULL.
  *
- *	Issues @ref MT3_STATUS_NOT_A_TREE, if the object pointed
+ *	Issues @ref BMT_STATUS_NOT_A_TREE, if the object pointed
  *	to by @param list is not NULL and not a list.
  *
  *	@ingroup list-insertion
  */
-SP_API void mt3_AppendFloat(MT3_node* list, SPfloat value);
+SP_API void bmt_AppendFloat(BMT_node* list, SPfloat value);
 
 /*!
  *	@brief Appends a double-node to the given list.
  *	If @param list points to NULL, a new list will be created.
  *	
- *	Issues @ref MT3_STATUS_BAD_VALUE, if @param list is NULL.
+ *	Issues @ref BMT_STATUS_BAD_VALUE, if @param list is NULL.
  *
- *	Issues @ref MT3_STATUS_NOT_A_TREE, if the object pointed
+ *	Issues @ref BMT_STATUS_NOT_A_TREE, if the object pointed
  *	to by @param list is not NULL and not a list.
  *
  *	@ingroup list-insertion
  */
-SP_API void mt3_AppendDouble(MT3_node* list, SPdouble value);
+SP_API void bmt_AppendDouble(BMT_node* list, SPdouble value);
 
 /*!
  *	@brief Appends a string-node to the given list.
  *	If @param list points to NULL, a new list will be created.
  *	
- *	Issues @ref MT3_STATUS_BAD_VALUE, if @param list is NULL.
+ *	Issues @ref BMT_STATUS_BAD_VALUE, if @param list is NULL.
  *
- *	Issues @ref MT3_STATUS_BAD_VALUE, if @param value is NULL.
+ *	Issues @ref BMT_STATUS_BAD_VALUE, if @param value is NULL.
  *
- *	Issues @ref MT3_STATUS_NOT_A_TREE, if the object pointed
+ *	Issues @ref BMT_STATUS_NOT_A_TREE, if the object pointed
  *	to by @param list is not NULL and not a list.
  *
  *	@ingroup list-insertion
  */
-SP_API void mt3_AppendString(MT3_node* list, const SPchar* value);
+SP_API void bmt_AppendString(BMT_node* list, const SPchar* value);
 
 /*!
  *	@brief Appends a byte-list-node to the given list.
  *	If @param list points to NULL, a new list will be created.
  *	A linked list will be implicitly created from @param values.
  *
- *	Issues @ref MT3_STATUS_BAD_VALUE, if @param list is NULL.
+ *	Issues @ref BMT_STATUS_BAD_VALUE, if @param list is NULL.
  *
- *	Issues @ref MT3_STATUS_NOT_A_LIST, if the object pointed
+ *	Issues @ref BMT_STATUS_NOT_A_LIST, if the object pointed
  *	to by @param list is not NULL and not a list.
  *
- *	Issues @ref MT3_STATUS_BAD_NAME, if @param name is NULL,
+ *	Issues @ref BMT_STATUS_BAD_NAME, if @param name is NULL,
  *	empty or already taken.
  *
- *	Issues @ref MT3_STATUS_BAD_VALUE, if @param value is NULL,
+ *	Issues @ref BMT_STATUS_BAD_VALUE, if @param value is NULL,
  *	or @param length is less-equal to zero.
  *
  *	@ingroup list-insertion
  */
-SP_API void mt3_AppendByteList(MT3_node* list, SPsize length, const SPbyte* values);
+SP_API void bmt_AppendByteList(BMT_node* list, SPsize length, const SPbyte* values);
 
 /*!
  *	@brief Appends a short-list-node to the given list.
  *	If @param list points to NULL, a new list will be created.
  *	A linked list will be implicitly created from @param values.
  *
- *	Issues @ref MT3_STATUS_BAD_VALUE, if @param list is NULL.
+ *	Issues @ref BMT_STATUS_BAD_VALUE, if @param list is NULL.
  *
- *	Issues @ref MT3_STATUS_NOT_A_LIST, if the object pointed
+ *	Issues @ref BMT_STATUS_NOT_A_LIST, if the object pointed
  *	to by @param list is not NULL and not a list.
  *
- *	Issues @ref MT3_STATUS_BAD_NAME, if @param name is NULL,
+ *	Issues @ref BMT_STATUS_BAD_NAME, if @param name is NULL,
  *	empty or already taken.
  *
- *	Issues @ref MT3_STATUS_BAD_VALUE, if @param value is NULL,
+ *	Issues @ref BMT_STATUS_BAD_VALUE, if @param value is NULL,
  *	or @param length is less-equal to zero.
  *
  *	@ingroup list-insertion
  */
-SP_API void mt3_AppendShortList(MT3_node* list, SPsize length, const SPshort* values);
+SP_API void bmt_AppendShortList(BMT_node* list, SPsize length, const SPshort* values);
 
 /*!
  *	@brief Appends an int-list-node to the given list.
  *	If @param list points to NULL, a new list will be created.
  *	A linked list will be implicitly created from @param values.
  *
- *	Issues @ref MT3_STATUS_BAD_VALUE, if @param list is NULL.
+ *	Issues @ref BMT_STATUS_BAD_VALUE, if @param list is NULL.
  *
- *	Issues @ref MT3_STATUS_NOT_A_LIST, if the object pointed
+ *	Issues @ref BMT_STATUS_NOT_A_LIST, if the object pointed
  *	to by @param list is not NULL and not a list.
  *
- *	Issues @ref MT3_STATUS_BAD_NAME, if @param name is NULL,
+ *	Issues @ref BMT_STATUS_BAD_NAME, if @param name is NULL,
  *	empty or already taken.
  *
- *	Issues @ref MT3_STATUS_BAD_VALUE, if @param value is NULL,
+ *	Issues @ref BMT_STATUS_BAD_VALUE, if @param value is NULL,
  *	or @param length is less-equal to zero.
  *
  *	@ingroup list-insertion
  */
-SP_API void mt3_AppendIntList(MT3_node* list, SPsize length, const SPint* values);
+SP_API void bmt_AppendIntList(BMT_node* list, SPsize length, const SPint* values);
 
 /*!
  *	@brief Appends a long-list-node to the given list.
  *	If @param list points to NULL, a new list will be created.
  *	A linked list will be implicitly created from @param values.
  *
- *	Issues @ref MT3_STATUS_BAD_VALUE, if @param list is NULL.
+ *	Issues @ref BMT_STATUS_BAD_VALUE, if @param list is NULL.
  *
- *	Issues @ref MT3_STATUS_NOT_A_LIST, if the object pointed
+ *	Issues @ref BMT_STATUS_NOT_A_LIST, if the object pointed
  *	to by @param list is not NULL and not a list.
  *
- *	Issues @ref MT3_STATUS_BAD_NAME, if @param name is NULL,
+ *	Issues @ref BMT_STATUS_BAD_NAME, if @param name is NULL,
  *	empty or already taken.
  *
- *	Issues @ref MT3_STATUS_BAD_VALUE, if @param value is NULL,
+ *	Issues @ref BMT_STATUS_BAD_VALUE, if @param value is NULL,
  *	or @param length is less-equal to zero.
  *
  *	@ingroup list-insertion
  */
-SP_API void mt3_AppendLongList(MT3_node* list, SPsize length, const SPlong* values);
+SP_API void bmt_AppendLongList(BMT_node* list, SPsize length, const SPlong* values);
 
 /*!
  *	@brief Appends a float-list-node to the given list.
  *	If @param list points to NULL, a new list will be created.
  *	A linked list will be implicitly created from @param values.
  *
- *	Issues @ref MT3_STATUS_BAD_VALUE, if @param list is NULL.
+ *	Issues @ref BMT_STATUS_BAD_VALUE, if @param list is NULL.
  *
- *	Issues @ref MT3_STATUS_NOT_A_LIST, if the object pointed
+ *	Issues @ref BMT_STATUS_NOT_A_LIST, if the object pointed
  *	to by @param list is not NULL and not a list.
  *
- *	Issues @ref MT3_STATUS_BAD_NAME, if @param name is NULL,
+ *	Issues @ref BMT_STATUS_BAD_NAME, if @param name is NULL,
  *	empty or already taken.
  *
- *	Issues @ref MT3_STATUS_BAD_VALUE, if @param value is NULL,
+ *	Issues @ref BMT_STATUS_BAD_VALUE, if @param value is NULL,
  *	or @param length is less-equal to zero.
  *
  *	@ingroup list-insertion
  */
-SP_API void mt3_AppendFloatList(MT3_node* list, SPsize length, const SPfloat* values);
+SP_API void bmt_AppendFloatList(BMT_node* list, SPsize length, const SPfloat* values);
 
 /*!
  *	@brief Appends a double-list-node to the given list.
  *	If @param list points to NULL, a new list will be created.
  *	A linked list will be implicitly created from @param values.
  *
- *	Issues @ref MT3_STATUS_BAD_VALUE, if @param list is NULL.
+ *	Issues @ref BMT_STATUS_BAD_VALUE, if @param list is NULL.
  *
- *	Issues @ref MT3_STATUS_NOT_A_LIST, if the object pointed
+ *	Issues @ref BMT_STATUS_NOT_A_LIST, if the object pointed
  *	to by @param list is not NULL and not a list.
  *
- *	Issues @ref MT3_STATUS_BAD_NAME, if @param name is NULL,
+ *	Issues @ref BMT_STATUS_BAD_NAME, if @param name is NULL,
  *	empty or already taken.
  *
- *	Issues @ref MT3_STATUS_BAD_VALUE, if @param value is NULL,
+ *	Issues @ref BMT_STATUS_BAD_VALUE, if @param value is NULL,
  *	or @param length is less-equal to zero.
  *
  *	@ingroup list-insertion
  */
-SP_API void mt3_AppendDoubleList(MT3_node* list, SPsize length, const SPdouble* values);
+SP_API void bmt_AppendDoubleList(BMT_node* list, SPsize length, const SPdouble* values);
 
 /*!
  *	@brief Appends a string-list-node to the given list.
@@ -955,90 +955,90 @@ SP_API void mt3_AppendDoubleList(MT3_node* list, SPsize length, const SPdouble* 
  *	A linked list will be implicitly created from @param values.
  *	Note that NULL-strings will be ignored.
  *
- *	Issues @ref MT3_STATUS_BAD_VALUE, if @param list is NULL.
+ *	Issues @ref BMT_STATUS_BAD_VALUE, if @param list is NULL.
  *
- *	Issues @ref MT3_STATUS_NOT_A_LIST, if the object pointed
+ *	Issues @ref BMT_STATUS_NOT_A_LIST, if the object pointed
  *	to by @param list is not NULL and not a list.
  *
- *	Issues @ref MT3_STATUS_BAD_NAME, if @param name is NULL,
+ *	Issues @ref BMT_STATUS_BAD_NAME, if @param name is NULL,
  *	empty or already taken.
  *
- *	Issues @ref MT3_STATUS_BAD_VALUE, if @param value is NULL,
+ *	Issues @ref BMT_STATUS_BAD_VALUE, if @param value is NULL,
  *	or @param length is less-equal to zero.
  *
  *	@ingroup list-insertion
  */
-SP_API void mt3_AppendStringList(MT3_node* list, SPsize length, const SPchar** values);
+SP_API void bmt_AppendStringList(BMT_node* list, SPsize length, const SPchar** values);
 
 /*!
  *	@brief Converts a contiguous array in memory to a linked list.
  *	
- *	@return NULL, if @param tag was MT3_TAG_NULL, MT3_TAG_ROOT or MT3_TAG_LIST,
+ *	@return NULL, if @param tag was BMT_TAG_NULL, BMT_TAG_ROOT or BMT_TAG_LIST,
  *	otherwise the newly created list.
  *
  *	@ingroup list-conversion
  */
-SP_API MT3_node mt3_ToList(MT3_tag tag, SPsize length, const void* data);
+SP_API BMT_node bmt_ToList(BMT_tag tag, SPsize length, const void* data);
 
 /*!
  *	@brief Removes an element of a list at the index @param pos.
  *	
- *	Issues @ref MT3_STATUS_BAD_VALUE, if @param list is NULL.
+ *	Issues @ref BMT_STATUS_BAD_VALUE, if @param list is NULL.
  *
- *	Issues @ref MT3_STATUS_NOT_A_LIST, if the object pointed
+ *	Issues @ref BMT_STATUS_NOT_A_LIST, if the object pointed
  *	to by @param list is not NULL and not a list.
  *
- *	Issues @ref MT3_STATUS_BAD_VALUE, @param length is less zero
+ *	Issues @ref BMT_STATUS_BAD_VALUE, @param length is less zero
  *	or exceeds the length of @param list.
  *	
  *	@ingroup list-removal
  */
-SP_API void mt3_RemoveAt(MT3_node* list, SPindex pos);
+SP_API void bmt_RemoveAt(BMT_node* list, SPindex pos);
 
 /*!
  *	@brief Dumps a tree to binary.
  *	
- *	Issues @ref MT3_STATUS_NOT_A_TREE, if @param is not a tree.
+ *	Issues @ref BMT_STATUS_NOT_A_TREE, if @param is not a tree.
  *
- *	Issues @ref MT3_STATUS_WRITE_ERROR at compression failure.
+ *	Issues @ref BMT_STATUS_WRITE_ERROR at compression failure.
  *	
  *	@return The newly created byte-array.
  *
  *	@ingroup tree-serialization
  */
-SP_API SPbuffer mt3_EncodeTree(const MT3_node tree);
+SP_API SPbuffer bmt_EncodeTree(const BMT_node tree);
 
 /*!
  *	@brief Reads a tree-node from a buffer in memory.
  *
- *	Issues @ref MT3_STATUS_NOT_A_TREE, if @param is not a tree.
+ *	Issues @ref BMT_STATUS_NOT_A_TREE, if @param is not a tree.
  *
- *	Issues @ref MT3_STATUS_WRITE_ERROR at decompression failure.
+ *	Issues @ref BMT_STATUS_WRITE_ERROR at decompression failure.
  *	
  *	@return The deserialized tree.
  *
  *	@ingroup tree-deserialization
  */
-SP_API MT3_node mt3_DecodeTree(SPbuffer buffer);
+SP_API BMT_node bmt_DecodeTree(SPbuffer buffer);
 
 /*!
  *	@brief Deletes an object node.
  *	
- *	Issues @ref MT3_STATUS_BAD_VALUE, if @param object
+ *	Issues @ref BMT_STATUS_BAD_VALUE, if @param object
  *	is neither a tree-nor a list-node.
  *
  *	@ingroup deletion
  */
-SP_API void mt3_Delete(MT3_node* object);
+SP_API void bmt_Delete(BMT_node* object);
 
 /*!
- *	@brief Returns the last error and resets to MT3_STATUS_OK.
+ *	@brief Returns the last error and resets to BMT_STATUS_OK.
  *	
  *	@return The last error-code.
  *
  *	@ingroup error-signaling
  */
-SP_API MT3_status mt3_GetLastError();
+SP_API BMT_status bmt_GetLastError();
 
 /*!
  *	@brief Returns an informative error-string by @param status.
@@ -1047,7 +1047,7 @@ SP_API MT3_status mt3_GetLastError();
  *
  *	@ingroup error-signaling
  */
-SP_API const SPchar* mt3_GetErrorInfo(MT3_status status);
+SP_API const SPchar* bmt_GetErrorInfo(BMT_status status);
 #ifdef __cplusplus
 }
 #endif
