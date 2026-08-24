@@ -15,6 +15,23 @@ permissions:
 
 jobs:
 
+  format-check:
+    name: clang-format check
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install clang-format
+        run: sudo apt-get update && sudo apt-get install -y clang-format
+
+      - name: Configure (format-check target only)
+        run: cmake -S . -B build -DBMT_BUILD_TESTS=OFF
+
+      - name: Check formatting
+        run: cmake --build build --target format-check
+
   build-linux-clang:
     name: Linux (Clang)
     runs-on: ubuntu-latest

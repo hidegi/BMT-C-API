@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.14 FATAL_ERROR)
 project(bmt VERSION 2.0.2 LANGUAGES C CXX)
 
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/cmake)
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake)
 include(utils)
 
 if(POLICY CMP0079)
@@ -14,12 +14,11 @@ if(POLICY CMP0068)
     cmake_policy(SET CMP0068 NEW)
 endif()
 
-set(CMAKE_C_STANDARD 99)
-set(CMAKE_C_STANDARD_REQUIRED ON)
-set(CMAKE_C_EXTENSIONS OFF)
-set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
+if(PROJECT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
+    set(BMT_TOP_LEVEL ON)
+else()
+    set(BMT_TOP_LEVEL OFF)
+endif()
 
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE "Debug" CACHE STRING "Build type: Debug|Release|RelWithDebInfo|MinSizeRel" FORCE)
@@ -40,8 +39,8 @@ elseif(UNIX)
 endif()
 
 configure_file(
-    "${CMAKE_SOURCE_DIR}/include/platform.h.in"
-    "${CMAKE_SOURCE_DIR}/include/platform.h"
+    "${PROJECT_SOURCE_DIR}/include/platform.h.in"
+    "${PROJECT_BINARY_DIR}/include/platform.h"
 )
 
 #-----------------------------------------------------------------------------
@@ -74,8 +73,11 @@ add_library(bmt STATIC
 )
 
 target_include_directories(bmt
-    PUBLIC  $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>
-    PRIVATE $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/src>
+    PUBLIC
+        $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
+        $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/include>
+    PRIVATE
+        $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src>
 )
 
 target_link_libraries(bmt PRIVATE ZLIB::ZLIB)
@@ -88,9 +90,16 @@ set_target_properties(bmt PROPERTIES
 )
 
 #-----------------------------------------------------------------------------
-# Tests
+# Format targets (top-level only)
 #-----------------------------------------------------------------------------
-option(BMT_BUILD_TESTS "Build the BMT test suite" ON)
+if(BMT_TOP_LEVEL)
+    bmt_add_format_targets()
+endif()
+
+#-----------------------------------------------------------------------------
+# Tests — off by default when used as a subdirectory / FetchContent dep
+#-----------------------------------------------------------------------------
+option(BMT_BUILD_TESTS "Build the BMT test suite" ${BMT_TOP_LEVEL})
 if(BMT_BUILD_TESTS)
     enable_testing()
     add_subdirectory(tests)

@@ -10,77 +10,87 @@
 
 // Data set arrangement.
 static const BMT_byte byte_data_set_01[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
-static const BMT_byte byte_data_set_02[] = {-31, -2, -74, -20, 15, -104, -67, 22, 36, -65, 118, -112, -22, -79, -7, -110, 59, -95, -70, 116};
-static const BMT_byte byte_data_set_03[] = {-17, 39, 97, -82, -54, -109, 95, -33, -91, 125, -31, -97, 126, -70, -55, 18, 60, -111, 54, 71};
-static const BMT_byte byte_data_set_04[] = {-91, 85, -124, -108, 126, 14, 125, 46, -64, 105, -70, 95, -31, -102, 91, 94, -126, -3, -10, 83};
-static const BMT_byte byte_data_set_05[] = {-71, 69, -100, -97, -44, -54, -98, -105, 15, 93, -94, 19, 1, 109, 6, 85, 103, 104, -79, 11};
-static const BMT_byte byte_data_set_06[] = {-22, -86, 63, 101, 61, -67, 51, 106, 35, -113, 100, 13, 52, -61, -116, 27, 97, 121, 89, -44};
-static const BMT_byte byte_data_set_07[] = {-111, -39, -98, 89, -44, -87, 40, 10, 11, -63, -27, 120, -120, 87, 81, -18, 116, 5, -123, 57};
-static const BMT_byte byte_data_set_08[] = {82, 70, -20, -14, 93, 69, -87, 85, -32, 11, 87, 81, -120, -2, -81, 115, -85, -65, 61, -78};
-static const BMT_byte byte_data_set_09[] = {77, -7, -120, -18, -57, 85, 82, 34, 19, -86, 32, -39, -31, -54, -119, -68, 63, 45, -61, 55};
-static const BMT_byte byte_data_set_10[] = {23, -60, -72, 104, -44, 105, 19, -55, 74, 3, 49, 70, -40, -122, 68, -80, 26, 90, -50, -35};
-static const BMT_byte* byte_data_set_list[] =
-    {
-        byte_data_set_01,
-        byte_data_set_02,
-        byte_data_set_03,
-        byte_data_set_04,
-        byte_data_set_05,
-        byte_data_set_06,
-        byte_data_set_07,
-        byte_data_set_08,
-        byte_data_set_09,
-        byte_data_set_10};
+static const BMT_byte byte_data_set_02[] = {-31, -2,   -74, -20, 15, -104, -67, 22,  36,  -65,
+                                            118, -112, -22, -79, -7, -110, 59,  -95, -70, 116};
+static const BMT_byte byte_data_set_03[] = {-17, 39,  97,  -82, -54, -109, 95, -33,  -91, 125,
+                                            -31, -97, 126, -70, -55, 18,   60, -111, 54,  71};
+static const BMT_byte byte_data_set_04[] = {-91, 85, -124, -108, 126, 14, 125,  46, -64, 105,
+                                            -70, 95, -31,  -102, 91,  94, -126, -3, -10, 83};
+static const BMT_byte byte_data_set_05[] = {-71, 69, -100, -97, -44, -54, -98, -105, 15,  93,
+                                            -94, 19, 1,    109, 6,   85,  103, 104,  -79, 11};
+static const BMT_byte byte_data_set_06[] = {-22, -86, 63, 101, 61,   -67, 51, 106, 35, -113,
+                                            100, 13,  52, -61, -116, 27,  97, 121, 89, -44};
+static const BMT_byte byte_data_set_07[] = {-111, -39, -98,  89, -44, -87, 40,  10, 11,   -63,
+                                            -27,  120, -120, 87, 81,  -18, 116, 5,  -123, 57};
+static const BMT_byte byte_data_set_08[] = {82, 70, -20,  -14, 93,  69,  -87, 85,  -32, 11,
+                                            87, 81, -120, -2,  -81, 115, -85, -65, 61,  -78};
+static const BMT_byte byte_data_set_09[] = {77, -7,  -120, -18, -57,  85,  82, 34, 19,  -86,
+                                            32, -39, -31,  -54, -119, -68, 63, 45, -61, 55};
+static const BMT_byte byte_data_set_10[] = {23, -60, -72, 104,  -44, 105, 19, -55, 74,  3,
+                                            49, 70,  -40, -122, 68,  -80, 26, 90,  -50, -35};
+static const BMT_byte* byte_data_set_list[] = {byte_data_set_01,
+                                               byte_data_set_02,
+                                               byte_data_set_03,
+                                               byte_data_set_04,
+                                               byte_data_set_05,
+                                               byte_data_set_06,
+                                               byte_data_set_07,
+                                               byte_data_set_08,
+                                               byte_data_set_09,
+                                               byte_data_set_10};
 
-static const BMT_short short_data_set_01[] = {-9970, -4214, 17959, 20047, 32484, 10290, 32446, 19327, -6423, -3255, 1920, 20003, 24628, 23842, 1864, -7852, -22168, 18088, -5971, 4675};
+static const BMT_short short_data_set_01[] = {-9970, -4214, 17959, 20047, 32484, 10290, 32446,  19327, -6423, -3255,
+                                              1920,  20003, 24628, 23842, 1864,  -7852, -22168, 18088, -5971, 4675};
 
-static const BMT_int int_data_set_01[] = {113509569, 212226681, 6774860, 87918185, 176696266, 97158013, 194371286, 65171540, 206851927, 87548538, 135515965, 117572157, 129648579, 33338548, 168840390, 153491841, 152125323, 178555076, 203763064, 133882281};
+static const BMT_int int_data_set_01[] = {113509569, 212226681, 6774860,   87918185,  176696266, 97158013,  194371286,
+                                          65171540,  206851927, 87548538,  135515965, 117572157, 129648579, 33338548,
+                                          168840390, 153491841, 152125323, 178555076, 203763064, 133882281};
 
-static const BMT_long long_data_set_01[] = {-53223493, -71864115, -16411365, 87570001, -3120436, 80489591, 29512253, 36060369, -11980516, -6666324, -41387253, 42097825, 64386482, -49058131, 57110268, -23297527, 82141980, 77956131, 14495604, 49816788};
+static const BMT_long long_data_set_01[] = {-53223493, -71864115, -16411365, 87570001,  -3120436, 80489591, 29512253,
+                                            36060369,  -11980516, -6666324,  -41387253, 42097825, 64386482, -49058131,
+                                            57110268,  -23297527, 82141980,  77956131,  14495604, 49816788};
 
-static BMT_float float_data_set_01[] = {2.347e+09, -9.876e+09, 5.250e+08, 3.147e+09, -4.333e+08, -7.123e+09, 8.998e+08, 1.074e+10, -2.999e+09, 0.0};
+static BMT_float float_data_set_01[] = {
+    2.347e+09, -9.876e+09, 5.250e+08, 3.147e+09, -4.333e+08, -7.123e+09, 8.998e+08, 1.074e+10, -2.999e+09, 0.0};
 
-static BMT_double double_data_set_01[] = {1.23456789e9, -2.34567890e8, 3.45678901e9, -4.56789012e7, 5.67890123e9, -6.78901234e8, 7.89012345e9, -8.90123456e6, 9.01234567e9, -1.12345678e10};
+static BMT_double double_data_set_01[] = {1.23456789e9,
+                                          -2.34567890e8,
+                                          3.45678901e9,
+                                          -4.56789012e7,
+                                          5.67890123e9,
+                                          -6.78901234e8,
+                                          7.89012345e9,
+                                          -8.90123456e6,
+                                          9.01234567e9,
+                                          -1.12345678e10};
 
 static const BMT_char* string_data_set_01[] = {
-    "Apple",
-    "Banana",
-    "Cherry",
-    "Date",
-    "Elderberry",
-    "Fig",
-    "Grape",
-    "Honeydew",
-    "Indian Fig",
-    "Jackfruit"};
+    "Apple", "Banana", "Cherry", "Date", "Elderberry", "Fig", "Grape", "Honeydew", "Indian Fig", "Jackfruit"};
 
-static const BMT_char* string_data_set_05[] = {
-    "Ostrich",
-    "Penguin",
-    "Quokka",
-    "Raccoon",
-    "Squirrel",
-    "Turtle",
-    NULL,
-    NULL,
-    "Uakari",
-    "Vulture",
-    NULL,
-    "Wolf",
-    "Xerus"};
+static const BMT_char* string_data_set_05[] = {"Ostrich",
+                                               "Penguin",
+                                               "Quokka",
+                                               "Raccoon",
+                                               "Squirrel",
+                                               "Turtle",
+                                               NULL,
+                                               NULL,
+                                               "Uakari",
+                                               "Vulture",
+                                               NULL,
+                                               "Wolf",
+                                               "Xerus"};
 
-static const BMT_char** string_data_set_list[] =
-    {
-        string_data_set_01,
-        string_data_set_01,
-        string_data_set_01,
-        string_data_set_01,
-        string_data_set_05,
-        string_data_set_01,
-        string_data_set_01,
-        string_data_set_01,
-        string_data_set_01,
-        string_data_set_01};
+static const BMT_char** string_data_set_list[] = {string_data_set_01,
+                                                  string_data_set_01,
+                                                  string_data_set_01,
+                                                  string_data_set_01,
+                                                  string_data_set_05,
+                                                  string_data_set_01,
+                                                  string_data_set_01,
+                                                  string_data_set_01,
+                                                  string_data_set_01,
+                                                  string_data_set_01};
 
 class BMTFixture : public testing::Test
 {
@@ -485,9 +495,11 @@ TEST_F(BMTFixture, RandomDeletion)
 
     delete[] array;
     ASSERT_TRUE(bmt_IsValidRBT(tree));
-    int indices[100] =
-        {
-            49, 14, 48, 9, 35, 27, 64, 58, 18, 55, 46, 20, 63, 11, 4, 70, 32, 90, 41, 66, 16, 76, 77, 33, 67, 43, 29, 57, 81, 6, 95, 26, 71, 60, 56, 78, 93, 74, 98, 75, 72, 23, 7, 47, 5, 17, 82, 100, 22, 52, 91, 36, 94, 2, 30, 34, 25, 21, 19, 42, 50, 80, 96, 59, 53, 86, 12, 87, 69, 61, 92, 83, 28, 68, 10, 54, 31, 8, 37, 85, 84, 3, 38, 24, 40, 45, 99, 88, 51, 44, 1, 15, 13, 89, 65, 39, 79, 73, 97, 62};
+    int indices[100] = {49, 14, 48, 9,  35, 27, 64, 58,  18, 55, 46, 20, 63, 11, 4,  70, 32, 90, 41, 66,
+                        16, 76, 77, 33, 67, 43, 29, 57,  81, 6,  95, 26, 71, 60, 56, 78, 93, 74, 98, 75,
+                        72, 23, 7,  47, 5,  17, 82, 100, 22, 52, 91, 36, 94, 2,  30, 34, 25, 21, 19, 42,
+                        50, 80, 96, 59, 53, 86, 12, 87,  69, 61, 92, 83, 28, 68, 10, 54, 31, 8,  37, 85,
+                        84, 3,  38, 24, 40, 45, 99, 88,  51, 44, 1,  15, 13, 89, 65, 39, 79, 73, 97, 62};
     for (int i = 0; i < LENGTH - 1; i++)
     {
         EXPECT_TRUE(bmt_Remove(&tree, std::string("int_" + std::to_string(indices[i])).c_str()));

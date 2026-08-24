@@ -29,16 +29,17 @@
 #define BMT_MAX_BUFFER_SIZE (1024 * 1024 * 1024)      /* 1 GB - buffer allocation limit */
 #define BMT_MAX_DECOMPRESSED_SIZE (256 * 1024 * 1024) /* 256 MB - decompression limit (zip bomb protection) */
 #define BMT_MAX_STRING_LENGTH (10 * 1024 * 1024)      /* 10 MB - maximum string length */
-#define BMT_MAX_LIST_LENGTH (100 * 1000 * 1000)       /* 100 M elements - maximum list size (memory exhaustion protection) */
+/* 100 M elements - maximum list size (memory exhaustion protection) */
+#define BMT_MAX_LIST_LENGTH (100 * 1000 * 1000)
 
-#define BMT_CHECKED_CALLOC(ptr, n, size, on_error) \
-    do                                             \
-    {                                              \
-        if (!((ptr) = calloc(n, size)))            \
-        {                                          \
-            bmt_error_flag = BMT_STATUS_NO_MEMORY; \
-            on_error;                              \
-        }                                          \
+#define BMT_CHECKED_CALLOC(ptr, n, size, on_error)                                                                     \
+    do                                                                                                                 \
+    {                                                                                                                  \
+        if (!((ptr) = calloc(n, size)))                                                                                \
+        {                                                                                                              \
+            bmt_error_flag = BMT_STATUS_NO_MEMORY;                                                                     \
+            on_error;                                                                                                  \
+        }                                                                                                              \
     } while (0)
 
 void _bmt_update(BMT_node node);

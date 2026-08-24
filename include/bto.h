@@ -131,7 +131,9 @@ namespace rb
              */
             void add(const std::string& domain, T data);
 
-            template<typename T, typename = typename std::enable_if<std::is_fundamental<typename fundamental_type<T>::type>::value && std::is_pointer<T>::value>::type>
+            template<typename T,
+                     typename = typename std::enable_if<std::is_fundamental<typename fundamental_type<T>::type>::value
+                                                        && std::is_pointer<T>::value>::type>
 
             /* ================================================================
              * Method add

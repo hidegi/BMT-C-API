@@ -117,7 +117,8 @@ static BMT_tag _bmt_get_object_tag(const BMT_node value)
     return tag;
 }
 
-static BMT_node _bmt_alloc_node(BMT_tag tag, const BMT_char* name, BMT_size length, const void* value, BMT_bool copyValue)
+static BMT_node
+_bmt_alloc_node(BMT_tag tag, const BMT_char* name, BMT_size length, const void* value, BMT_bool copyValue)
 {
     BMT_node node = NULL;
     BMT_CHECKED_CALLOC(node, 1, sizeof(struct _BMT_node), return NULL);
@@ -820,8 +821,13 @@ BMT_node _bmt_search(const BMT_node tree, const BMT_char* name)
     return ret;
 }
 
-static BMT_node _bmt_insert_data(
-    BMT_node* head, BMT_node node, const BMT_char* name, BMT_tag tag, BMT_size length, const void* value, BMT_bool copyValue)
+static BMT_node _bmt_insert_data(BMT_node* head,
+                                 BMT_node node,
+                                 const BMT_char* name,
+                                 BMT_tag tag,
+                                 BMT_size length,
+                                 const void* value,
+                                 BMT_bool copyValue)
 {
     if (!node)
     {

@@ -26,7 +26,7 @@
 static BMT_node _bmt_rotate_left(BMT_node n, BMT_node* head);
 static BMT_node _bmt_rotate_right(BMT_node n, BMT_node* head);
 static BMT_bool _bmt_transplant_rbt(BMT_node x, BMT_node w, BMT_node* head);
-static BMT_bool _bmt_transplant_proc_0(BMT_node x);
+static BMT_bool     _bmt_transplant_proc_0(BMT_node x);
 static BMT_bool _bmt_transplant_proc_1(BMT_node x, BMT_node w, BMT_node* head);
 static BMT_bool _bmt_transplant_proc_2(BMT_node x, BMT_node w, BMT_node* head);
 static BMT_bool _bmt_transplant_proc_3(BMT_node x, BMT_node w, BMT_node* head);

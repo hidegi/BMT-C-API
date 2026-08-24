@@ -1,3 +1,33 @@
+function(bmt_add_format_targets)
+    find_program(CLANG_FORMAT_EXE NAMES clang-format)
+    if(NOT CLANG_FORMAT_EXE)
+        message(STATUS "clang-format not found — format targets unavailable")
+        return()
+    endif()
+
+    file(GLOB_RECURSE FORMAT_SOURCES
+        "${PROJECT_SOURCE_DIR}/src/*.c"
+        "${PROJECT_SOURCE_DIR}/include/*.h"
+        "${PROJECT_SOURCE_DIR}/tests/*.cpp"
+        "${PROJECT_SOURCE_DIR}/tests/*.h"
+    )
+    list(FILTER FORMAT_SOURCES EXCLUDE REGEX ".*platform\\.h$")
+
+    add_custom_target(format
+        COMMAND ${CLANG_FORMAT_EXE} -i --style=file ${FORMAT_SOURCES}
+        WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+        COMMENT "Formatting sources with clang-format"
+        VERBATIM
+    )
+
+    add_custom_target(format-check
+        COMMAND ${CLANG_FORMAT_EXE} --dry-run --Werror --style=file ${FORMAT_SOURCES}
+        WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+        COMMENT "Checking source format (fails if any file needs reformatting)"
+        VERBATIM
+    )
+endfunction()
+
 macro(bmt_set_default_option var default type docstring)
         if(NOT DEFINED ${var})
                 set(${var} ${default})
@@ -120,7 +150,8 @@ function(bmt_add_test TEST_NAME)
     bmt_set_stdlib(${TEST_NAME})
 
     target_include_directories(${TEST_NAME} PRIVATE
-        ${CMAKE_SOURCE_DIR}/include
+        ${PROJECT_SOURCE_DIR}/include
+        ${PROJECT_BINARY_DIR}/include
     )
     target_compile_features(${TEST_NAME} PRIVATE cxx_std_11)
 

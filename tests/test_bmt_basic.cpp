@@ -11,36 +11,36 @@
 int g_tests_run = 0;
 int g_tests_passed = 0;
 
-#define TEST(name)                                          \
-    void name();                                            \
-    struct name##_runner                                    \
-    {                                                       \
-            name##_runner()                                 \
-            {                                               \
-                std::cout << "Running " << #name << "... "; \
-                g_tests_run++;                              \
-                try                                         \
-                {                                           \
-                    name();                                 \
-                    g_tests_passed++;                       \
-                    std::cout << "PASSED\n";                \
-                }                                           \
-                catch (...)                                 \
-                {                                           \
-                    std::cout << "FAILED\n";                \
-                }                                           \
-            }                                               \
-    } name##_instance;                                      \
+#define TEST(name)                                                                                                     \
+    void name();                                                                                                       \
+    struct name##_runner                                                                                               \
+    {                                                                                                                  \
+            name##_runner()                                                                                            \
+            {                                                                                                          \
+                std::cout << "Running " << #name << "... ";                                                            \
+                g_tests_run++;                                                                                         \
+                try                                                                                                    \
+                {                                                                                                      \
+                    name();                                                                                            \
+                    g_tests_passed++;                                                                                  \
+                    std::cout << "PASSED\n";                                                                           \
+                }                                                                                                      \
+                catch (...)                                                                                            \
+                {                                                                                                      \
+                    std::cout << "FAILED\n";                                                                           \
+                }                                                                                                      \
+            }                                                                                                          \
+    } name##_instance;                                                                                                 \
     void name()
 
-#define ASSERT(condition)                                                                              \
-    do                                                                                                 \
-    {                                                                                                  \
-        if (!(condition))                                                                              \
-        {                                                                                              \
-            std::cerr << "  Assertion failed: " << #condition << " at line " << __LINE__ << std::endl; \
-            throw std::runtime_error("Test failed");                                                   \
-        }                                                                                              \
+#define ASSERT(condition)                                                                                              \
+    do                                                                                                                 \
+    {                                                                                                                  \
+        if (!(condition))                                                                                              \
+        {                                                                                                              \
+            std::cerr << "  Assertion failed: " << #condition << " at line " << __LINE__ << std::endl;                 \
+            throw std::runtime_error("Test failed");                                                                   \
+        }                                                                                                              \
     } while (0)
 
 #define ASSERT_EQ(a, b) ASSERT((a) == (b))

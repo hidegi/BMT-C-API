@@ -216,7 +216,8 @@ static void* _bmt_alloc_chunk(BMT_size size)
     return ptr;
 }
 
-static void _bmt_write_bytes(BMT_buffer* buffer, const BMT_ubyte* src, BMT_size length, BMT_bool toNativeEndian, int level)
+static void
+_bmt_write_bytes(BMT_buffer* buffer, const BMT_ubyte* src, BMT_size length, BMT_bool toNativeEndian, int level)
 {
     if (!buffer || !src)
     {
@@ -256,7 +257,8 @@ static void _bmt_encode(const BMT_node node, BMT_buffer* buffer, int level)
                 _bmt_write_bytes(buffer, (const BMT_ubyte*)&node->payload.tag_byte, sizeof(BMT_byte), BMT_TRUE, level);
                 break;
             case BMT_TAG_SHORT:
-                _bmt_write_bytes(buffer, (const BMT_ubyte*)&node->payload.tag_short, sizeof(BMT_short), BMT_TRUE, level);
+                _bmt_write_bytes(
+                    buffer, (const BMT_ubyte*)&node->payload.tag_short, sizeof(BMT_short), BMT_TRUE, level);
                 break;
             case BMT_TAG_INT:
                 _bmt_write_bytes(buffer, (const BMT_ubyte*)&node->payload.tag_int, sizeof(BMT_int), BMT_TRUE, level);
@@ -265,10 +267,12 @@ static void _bmt_encode(const BMT_node node, BMT_buffer* buffer, int level)
                 _bmt_write_bytes(buffer, (const BMT_ubyte*)&node->payload.tag_long, sizeof(BMT_long), BMT_TRUE, level);
                 break;
             case BMT_TAG_FLOAT:
-                _bmt_write_bytes(buffer, (const BMT_ubyte*)&node->payload.tag_float, sizeof(BMT_float), BMT_TRUE, level);
+                _bmt_write_bytes(
+                    buffer, (const BMT_ubyte*)&node->payload.tag_float, sizeof(BMT_float), BMT_TRUE, level);
                 break;
             case BMT_TAG_DOUBLE:
-                _bmt_write_bytes(buffer, (const BMT_ubyte*)&node->payload.tag_double, sizeof(BMT_double), BMT_TRUE, level);
+                _bmt_write_bytes(
+                    buffer, (const BMT_ubyte*)&node->payload.tag_double, sizeof(BMT_double), BMT_TRUE, level);
                 break;
             case BMT_TAG_STRING:
             {

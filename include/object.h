@@ -5,17 +5,17 @@
  */
 #ifndef RB_BINARY_OBJECT_H
 #define RB_BINARY_OBJECT_H
-#include "platform.h"
 #include "bmt.h"
+#include "platform.h"
 #include <string>
 #include <type_traits>
 
 #ifndef RB_NO_DEBUG
-#define BMT_CHECK(x)                                       \
-    do                                                     \
-    {                                                      \
-        x;                                                 \
-        BinaryObject::checkErrors(__FILE__, __LINE__, #x); \
+#define BMT_CHECK(x)                                                                                                   \
+    do                                                                                                                 \
+    {                                                                                                                  \
+        x;                                                                                                             \
+        BinaryObject::checkErrors(__FILE__, __LINE__, #x);                                                             \
     } while (0)
 #else
 #define BMT_CHECK(x) (x)
@@ -66,7 +66,8 @@ namespace rb
             template<typename T>
             struct fundamental_type
             {
-                    using type = typename std::remove_cv<typename std::remove_reference<typename remove_pointer<T>::type>::type>::type;
+                    using type = typename std::remove_cv<
+                        typename std::remove_reference<typename remove_pointer<T>::type>::type>::type;
             };
 
         public:
