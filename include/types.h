@@ -20,8 +20,8 @@
  * 3. This notice may not be removed or altered from any source
  * distribution.
  ****************************************************************************/
-#ifndef SP_TYPES_H
-#define SP_TYPES_H
+#ifndef BMT_TYPES_H
+#define BMT_TYPES_H
 typedef float SPfloat;
 typedef double SPdouble;
 
@@ -37,15 +37,15 @@ typedef unsigned short SPuint16;
 typedef SPint16 SPshort;
 typedef SPuint16 SPushort;
 
-#define SP_FALSE 0
-#define SP_TRUE 1
+#define BMT_FALSE 0
+#define BMT_TRUE 1
 typedef signed int SPint32;
 typedef unsigned int SPuint32;
 typedef SPint32 SPint;
 typedef SPuint32 SPuint;
 typedef SPint SPbool;
 
-#if defined(SP_MSC_VER)
+#if defined(BMT_MSC_VER)
 typedef signed __int64 SPint64;
 typedef unsigned __int64 SPuint64;
 #else

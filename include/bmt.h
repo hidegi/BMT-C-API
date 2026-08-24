@@ -22,15 +22,22 @@
  ****************************************************************************/
 #ifndef BMT_PUBLIC_INTERFACE_H
 #define BMT_PUBLIC_INTERFACE_H
+#if defined(_MSC_VER)
+    #define BMT_THREAD_LOCAL __declspec(thread)
+#elif defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 201112L)
+    // C11 standard
+    #define BMT_THREAD_LOCAL _Thread_local
+#else
+    // Fallback for GCC/Clang
+    #define BMT_THREAD_LOCAL __thread
+#endif
 
-#include "platform.h"
 #include "types.h"
 #include "buffer.h"
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
-#include "debug.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -76,11 +83,22 @@ typedef enum
 	BMT_STATUS_BAD_TAG,	/// Invalid tag.
 } BMT_status;
 
+/**
+ * Thread-local error storage for BMT operations.
+ * 
+ * Each thread has its own error flag, making BMT functions thread-safe
+ * with respect to error reporting. After calling any BMT function,
+ * check for errors using bmt_GetLastError() which clears the flag.
+ * 
+ * Note: This is thread-local, not instance-local. If you use BMT from
+ * multiple threads operating on different trees, each thread will have
+ * its own error state. This is intentional for thread-safety.
+ */
+extern BMT_THREAD_LOCAL BMT_status bmt_error_flag;
 struct _BMT_node
 {	
 	// Do not modify these members directly!
 	// (Causes undefined behaviour)
-	SPhash weight;
 	BMT_tag tag;
 	
 	SPubyte nameLength; // Name should not exceed 255 characters.
@@ -120,7 +138,7 @@ typedef struct _BMT_node* BMT_node;
  *
  *	@ingroup allocation
  */
-SP_API BMT_node bmt_AllocTree();
+BMT_node bmt_AllocTree();
 
 /*!
  *	@brief Allocates a list-node.
@@ -133,7 +151,7 @@ SP_API BMT_node bmt_AllocTree();
  *
  *	@ingroup allocation
  */
-SP_API BMT_node bmt_AllocList();
+BMT_node bmt_AllocList();
 
 /*!
  *	@brief Dumps an object to a human-readable string.
@@ -149,11 +167,13 @@ SP_API BMT_node bmt_AllocList();
  *	Issues @ref BMT_STATUS_BAD_VALUE, 
  *	if @param object is not a head-node.
  *	
- *	@return The output string.
+ *	@return An SPbuffer containing the output string. Caller must call
+ *	        spBufferFree() on the returned buffer when done.
+ *	        DO NOT use this in performance-critical code due to allocation overhead.
  *
  *	@ingroup debug
  */
-SP_API const SPchar* bmt_ToString(const BMT_node object);
+SPbuffer bmt_ToString(const BMT_node object);
 
 /*!
  *	@brief Same as @ref bmt_ToString, but prints the output
@@ -161,7 +181,7 @@ SP_API const SPchar* bmt_ToString(const BMT_node object);
  *
  *	@ingroup debug
  */
-SP_API void bmt_Print(const BMT_node object);
+void bmt_Print(const BMT_node object);
 
 /*!
  *	@brief Compares the tag, colour, value and
@@ -172,7 +192,7 @@ SP_API void bmt_Print(const BMT_node object);
  *
  *	@ingroup comparison
  */
-SP_API SPbool bmt_IsEqual(const BMT_node a, const BMT_node b);
+SPbool bmt_IsEqual(const BMT_node a, const BMT_node b);
 
 /*!
  *	@brief Copies a tree-or list-node.
@@ -184,7 +204,7 @@ SP_API SPbool bmt_IsEqual(const BMT_node a, const BMT_node b);
  *	
  *	@ingroup copying
  */
-SP_API BMT_node bmt_Copy(const BMT_node object);
+BMT_node bmt_Copy(const BMT_node object);
 
 /*!
  *	@brief Tells whether or not @param tree is a tree-node.
@@ -197,7 +217,7 @@ SP_API BMT_node bmt_Copy(const BMT_node object);
  *	
  *	@ingroup tree-validation
  */
-SP_API SPbool bmt_IsTree(const BMT_node tree);
+SPbool bmt_IsTree(const BMT_node tree);
 
 /*!
  *	@brief Inserts an empty tree-node to the given tree.
@@ -213,7 +233,7 @@ SP_API SPbool bmt_IsTree(const BMT_node tree);
  *	
  *	@ingroup tree-insertion
  */
-SP_API void bmt_CreateTree(BMT_node* tree, const SPchar* name);
+void bmt_CreateTree(BMT_node* tree, const SPchar* name);
 
 /*!
  *	@brief Inserts an empty list-node to the given tree.
@@ -229,7 +249,7 @@ SP_API void bmt_CreateTree(BMT_node* tree, const SPchar* name);
  *	
  *	@ingroup tree-insertion
  */ 
-SP_API void bmt_CreateList(BMT_node* tree, const SPchar* name);
+void bmt_CreateList(BMT_node* tree, const SPchar* name);
 
 /*!
  *	@brief Inserts a tree-or list-node to the given tree.
@@ -245,7 +265,7 @@ SP_API void bmt_CreateList(BMT_node* tree, const SPchar* name);
  *	
  *	@ingroup tree-insertion
  */
-SP_API void bmt_Insert(BMT_node* tree, const SPchar* name, const BMT_node value);
+void bmt_Insert(BMT_node* tree, const SPchar* name, const BMT_node value);
 
 /*!
  *	@brief Inserts a byte-node to the given tree.
@@ -261,7 +281,7 @@ SP_API void bmt_Insert(BMT_node* tree, const SPchar* name, const BMT_node value)
  *
  *	@ingroup tree-insertion
  */
-SP_API void bmt_InsertByte(BMT_node* tree, const SPchar* name, SPbyte value);
+void bmt_InsertByte(BMT_node* tree, const SPchar* name, SPbyte value);
 
 /*!
  *	@brief Inserts a short-node to the given tree.
@@ -277,7 +297,7 @@ SP_API void bmt_InsertByte(BMT_node* tree, const SPchar* name, SPbyte value);
  *
  *	@ingroup tree-insertion
  */
-SP_API void bmt_InsertShort(BMT_node* tree, const SPchar* name, SPshort value);
+void bmt_InsertShort(BMT_node* tree, const SPchar* name, SPshort value);
 
 /*!
  *	@brief Inserts an int-node to the given tree.
@@ -293,7 +313,7 @@ SP_API void bmt_InsertShort(BMT_node* tree, const SPchar* name, SPshort value);
  *
  *	@ingroup tree-insertion
  */
-SP_API void bmt_InsertInt(BMT_node* tree, const SPchar* name, SPint value);
+void bmt_InsertInt(BMT_node* tree, const SPchar* name, SPint value);
 
 /*!
  *	@brief Inserts a long-node to the given tree.
@@ -309,7 +329,7 @@ SP_API void bmt_InsertInt(BMT_node* tree, const SPchar* name, SPint value);
  *
  *	@ingroup tree-insertion
  */
-SP_API void bmt_InsertLong(BMT_node* tree, const SPchar* name, SPlong value);
+void bmt_InsertLong(BMT_node* tree, const SPchar* name, SPlong value);
 
 /*!
  *	@brief Inserts a float-node to the given tree.
@@ -325,7 +345,7 @@ SP_API void bmt_InsertLong(BMT_node* tree, const SPchar* name, SPlong value);
  *
  *	@ingroup tree-insertion
  */
-SP_API void bmt_InsertFloat(BMT_node* tree, const SPchar* name, SPfloat value);
+void bmt_InsertFloat(BMT_node* tree, const SPchar* name, SPfloat value);
 
 /*!
  *	@brief Inserts a double-node to the given tree.
@@ -341,7 +361,7 @@ SP_API void bmt_InsertFloat(BMT_node* tree, const SPchar* name, SPfloat value);
  *
  *	@ingroup tree-insertion
  */
-SP_API void bmt_InsertDouble(BMT_node* tree, const SPchar* name, SPdouble value);
+void bmt_InsertDouble(BMT_node* tree, const SPchar* name, SPdouble value);
 
 /*!
  *	@brief Inserts a string-node to the given tree.
@@ -359,7 +379,7 @@ SP_API void bmt_InsertDouble(BMT_node* tree, const SPchar* name, SPdouble value)
  *	
  *	@ingroup tree-insertion
  */
-SP_API void bmt_InsertString(BMT_node* tree, const SPchar* name, const SPchar* value);
+void bmt_InsertString(BMT_node* tree, const SPchar* name, const SPchar* value);
 
 /*!
  *	@brief Inserts a byte-list-node to the given tree.
@@ -379,7 +399,7 @@ SP_API void bmt_InsertString(BMT_node* tree, const SPchar* name, const SPchar* v
  *
  *	@ingroup tree-insertion
  */
-SP_API void bmt_InsertByteList(BMT_node* tree, const SPchar* name, SPsize length, const SPbyte* values);
+void bmt_InsertByteList(BMT_node* tree, const SPchar* name, SPsize length, const SPbyte* values);
 
 /*!
  *	@brief Inserts a short-list-node to the given tree.
@@ -399,7 +419,7 @@ SP_API void bmt_InsertByteList(BMT_node* tree, const SPchar* name, SPsize length
  *
  *	@ingroup tree-insertion
  */
-SP_API void bmt_InsertShortList(BMT_node* tree, const SPchar* name, SPsize length, const SPshort* values);
+void bmt_InsertShortList(BMT_node* tree, const SPchar* name, SPsize length, const SPshort* values);
 
 /*!
  *	@brief Inserts an int-list-node to the given tree.
@@ -418,7 +438,7 @@ SP_API void bmt_InsertShortList(BMT_node* tree, const SPchar* name, SPsize lengt
  *
  *	@ingroup tree-insertion
  */
-SP_API void bmt_InsertIntList(BMT_node* tree, const SPchar* name, SPsize length, const SPint* values);
+void bmt_InsertIntList(BMT_node* tree, const SPchar* name, SPsize length, const SPint* values);
 
 /*!
  *	@brief Inserts a long-list-node to the given tree.
@@ -438,7 +458,7 @@ SP_API void bmt_InsertIntList(BMT_node* tree, const SPchar* name, SPsize length,
  *
  *	@ingroup tree-insertion
  */
-SP_API void bmt_InsertLongList(BMT_node* tree, const SPchar* name, SPsize length, const SPlong* values);
+void bmt_InsertLongList(BMT_node* tree, const SPchar* name, SPsize length, const SPlong* values);
 
 /*!
  *	@brief Inserts a float-list-node to the given tree.
@@ -458,7 +478,7 @@ SP_API void bmt_InsertLongList(BMT_node* tree, const SPchar* name, SPsize length
  *
  *	@ingroup tree-insertion
  */
-SP_API void bmt_InsertFloatList(BMT_node* tree, const SPchar* name, SPsize length, const SPfloat* values);
+void bmt_InsertFloatList(BMT_node* tree, const SPchar* name, SPsize length, const SPfloat* values);
 
 /*!
  *	@brief Inserts a double-list-node to the given tree.
@@ -478,7 +498,7 @@ SP_API void bmt_InsertFloatList(BMT_node* tree, const SPchar* name, SPsize lengt
  *
  *	@ingroup tree-insertion
  */
-SP_API void bmt_InsertDoubleList(BMT_node* tree, const SPchar* name, SPsize length, const SPdouble* values);
+void bmt_InsertDoubleList(BMT_node* tree, const SPchar* name, SPsize length, const SPdouble* values);
 
 /*!
  *	@brief Inserts a string-list-node to the given tree.
@@ -499,7 +519,7 @@ SP_API void bmt_InsertDoubleList(BMT_node* tree, const SPchar* name, SPsize leng
  *
  *	@ingroup tree-insertion
  */
-SP_API void bmt_InsertStringList(BMT_node* tree, const SPchar* name, SPsize length, const SPchar** values);
+void bmt_InsertStringList(BMT_node* tree, const SPchar* name, SPsize length, const SPchar** values);
 
 /*!
  *	@brief Returns the value stored in any integer-type nodes
@@ -512,7 +532,7 @@ SP_API void bmt_InsertStringList(BMT_node* tree, const SPchar* name, SPsize leng
  *
  *	@ingroup tree-getters
  */
-SP_API SPlong bmt_GetNumber(const BMT_node tree, const SPchar* name);
+SPlong bmt_GetNumber(const BMT_node tree, const SPchar* name);
 
 /*!
  *	@brief Returns the value stored in any floating-type nodes
@@ -525,7 +545,7 @@ SP_API SPlong bmt_GetNumber(const BMT_node tree, const SPchar* name);
  *
  *	@ingroup tree-getters
  */
-SP_API SPdouble bmt_GetDecimal(const BMT_node tree, const SPchar* name);
+SPdouble bmt_GetDecimal(const BMT_node tree, const SPchar* name);
 
 /*!
  *	@brief Returns the value stored in a byte-node
@@ -538,7 +558,7 @@ SP_API SPdouble bmt_GetDecimal(const BMT_node tree, const SPchar* name);
  *
  *	@ingroup tree-getters
  */
-SP_API SPbyte bmt_GetByte(const BMT_node tree, const SPchar* name);
+SPbyte bmt_GetByte(const BMT_node tree, const SPchar* name);
 
 /*!
  *	@brief Returns the value stored in a short-node
@@ -551,7 +571,7 @@ SP_API SPbyte bmt_GetByte(const BMT_node tree, const SPchar* name);
  *
  *	@ingroup tree-getters
  */
-SP_API SPshort bmt_GetShort(const BMT_node tree, const SPchar* name);
+SPshort bmt_GetShort(const BMT_node tree, const SPchar* name);
 
 /*!
  *	@brief Returns the value stored in an int-node
@@ -564,7 +584,7 @@ SP_API SPshort bmt_GetShort(const BMT_node tree, const SPchar* name);
  *
  *	@ingroup tree-getters
  */
-SP_API SPint bmt_GetInt(const BMT_node tree, const SPchar* name);
+SPint bmt_GetInt(const BMT_node tree, const SPchar* name);
 
 /*!
  *	@brief Returns the value stored in a long-node
@@ -577,7 +597,7 @@ SP_API SPint bmt_GetInt(const BMT_node tree, const SPchar* name);
  *
  *	@ingroup tree-getters
  */
-SP_API SPlong bmt_GetLong(const BMT_node tree, const SPchar* name);
+SPlong bmt_GetLong(const BMT_node tree, const SPchar* name);
 
 /*!
  *	@brief Returns the value stored in a float-node
@@ -590,7 +610,7 @@ SP_API SPlong bmt_GetLong(const BMT_node tree, const SPchar* name);
  *
  *	@ingroup tree-getters
  */
-SP_API SPfloat bmt_GetFloat(const BMT_node tree, const SPchar* name);
+SPfloat bmt_GetFloat(const BMT_node tree, const SPchar* name);
 
 /*!
  *	@brief Returns the value stored in a double-node
@@ -603,7 +623,7 @@ SP_API SPfloat bmt_GetFloat(const BMT_node tree, const SPchar* name);
  *
  *	@ingroup tree-getters
  */
-SP_API SPdouble bmt_GetDouble(const BMT_node tree, const SPchar* name);
+SPdouble bmt_GetDouble(const BMT_node tree, const SPchar* name);
 
 /*!
  *	@brief Returns the value stored in a string-node
@@ -616,7 +636,7 @@ SP_API SPdouble bmt_GetDouble(const BMT_node tree, const SPchar* name);
  *
  *	@ingroup tree-getters
  */
-SP_API const SPchar* bmt_GetString(const BMT_node tree, const SPchar* name);
+const SPchar* bmt_GetString(const BMT_node tree, const SPchar* name);
 
 /*!
  *	@brief Returns the object stored in a tree-or list-node.
@@ -629,43 +649,43 @@ SP_API const SPchar* bmt_GetString(const BMT_node tree, const SPchar* name);
  *
  *	@ingroup tree-getters
  */
-SP_API BMT_node bmt_Get(const BMT_node tree, const SPchar* name);
+BMT_node bmt_Get(const BMT_node tree, const SPchar* name);
 
 /*!
  *	@brief Sets the value stored in a byte-node found by @param name.
  *	@ingroup tree-setters
  */
-SP_API void bmt_SetByte(BMT_node tree, const SPchar* name, SPbyte value);
+void bmt_SetByte(BMT_node tree, const SPchar* name, SPbyte value);
 
 /*!
  *	@brief Sets the value stored in a short-node found by @param name.
  *	@ingroup tree-setters
  */
-SP_API void bmt_SetShort(BMT_node tree, const SPchar* name, SPshort value);
+void bmt_SetShort(BMT_node tree, const SPchar* name, SPshort value);
 
 /*!
  *	@brief Sets the value stored in an int-node found by @param name.
  *	@ingroup tree-setters
  */
-SP_API void bmt_SetInt(BMT_node tree, const SPchar* name, SPint value);
+void bmt_SetInt(BMT_node tree, const SPchar* name, SPint value);
 
 /*!
  *	@brief Sets the value stored in a long-node found by @param name.
  *	@ingroup tree-setters
  */
-SP_API void bmt_SetLong(BMT_node tree, const SPchar* name, SPlong value);
+void bmt_SetLong(BMT_node tree, const SPchar* name, SPlong value);
 
 /*!
  *	@brief Sets the value stored in a float-node found by @param name.
  *	@ingroup tree-setters
  */
-SP_API void bmt_SetFloat(BMT_node tree, const SPchar* name, SPfloat value);
+void bmt_SetFloat(BMT_node tree, const SPchar* name, SPfloat value);
 
 /*!
  *	@brief Sets the value stored in a double-node found by @param name.
  *	@ingroup tree-setters
  */
-SP_API void bmt_SetDouble(BMT_node tree, const SPchar* name, SPdouble value);
+void bmt_SetDouble(BMT_node tree, const SPchar* name, SPdouble value);
 
 /*!
  *	@brief Sets the value stored in a long-node found by @param name.
@@ -674,7 +694,7 @@ SP_API void bmt_SetDouble(BMT_node tree, const SPchar* name, SPdouble value);
  *
  *	@ingroup tree-setters
  */
-SP_API void bmt_SetString(BMT_node tree, const SPchar* name, const SPchar* value);
+void bmt_SetString(BMT_node tree, const SPchar* name, const SPchar* value);
 
 /*!
  *	@brief Removes a node from a tree.
@@ -686,7 +706,7 @@ SP_API void bmt_SetString(BMT_node tree, const SPchar* name, const SPchar* value
  *
  *	@ingroup tree-removal
  */
-SP_API SPbool bmt_Remove(BMT_node* tree, const SPchar* name);
+SPbool bmt_Remove(BMT_node* tree, const SPchar* name);
 
 /*!
  *	@brief Checks if @param rbt conforms the properties
@@ -698,7 +718,7 @@ SP_API SPbool bmt_Remove(BMT_node* tree, const SPchar* name);
  *	@ingroup tree-validation
  */
  
-SP_API SPbool bmt_IsValidRBT(const BMT_node rbt);
+SPbool bmt_IsValidRBT(const BMT_node rbt);
 
 /*!
  *	@brief Tells whether or not @param list is a list-node.
@@ -708,7 +728,7 @@ SP_API SPbool bmt_IsValidRBT(const BMT_node rbt);
  *	
  *	@ingroup list-validation
  */
-SP_API SPbool bmt_IsList(const BMT_node list);
+SPbool bmt_IsList(const BMT_node list);
 
 /*!
  *	@brief Returns the length of @param list.
@@ -718,7 +738,7 @@ SP_API SPbool bmt_IsList(const BMT_node list);
  *	
  *	@ingroup list-insertion
  */
-SP_API SPsize bmt_Length(const BMT_node list);
+SPsize bmt_Length(const BMT_node list);
 
 /*!
  *	@brief Appends a tree-or list-node to the given list.
@@ -734,7 +754,7 @@ SP_API SPsize bmt_Length(const BMT_node list);
  *	
  *	@ingroup list-insertion
  */
-SP_API void bmt_Append(BMT_node* list, const BMT_node value);
+void bmt_Append(BMT_node* list, const BMT_node value);
 
 /*!
  *	@brief Appends a byte-node to the given list.
@@ -747,7 +767,7 @@ SP_API void bmt_Append(BMT_node* list, const BMT_node value);
  *
  *	@ingroup list-insertion
  */
-SP_API void bmt_AppendByte(BMT_node* list, SPbyte value);
+void bmt_AppendByte(BMT_node* list, SPbyte value);
 
 /*!
  *	@brief Appends a short-node to the given list.
@@ -760,7 +780,7 @@ SP_API void bmt_AppendByte(BMT_node* list, SPbyte value);
  *
  *	@ingroup list-insertion
  */
-SP_API void bmt_AppendShort(BMT_node* list, SPshort value);
+void bmt_AppendShort(BMT_node* list, SPshort value);
 
 /*!
  *	@brief Appends an int-node to the given list.
@@ -773,7 +793,7 @@ SP_API void bmt_AppendShort(BMT_node* list, SPshort value);
  *
  *	@ingroup list-insertion
  */
-SP_API void bmt_AppendInt(BMT_node* list, SPint value);
+void bmt_AppendInt(BMT_node* list, SPint value);
 
 /*!
  *	@brief Appends a long-node to the given list.
@@ -786,7 +806,7 @@ SP_API void bmt_AppendInt(BMT_node* list, SPint value);
  *
  *	@ingroup list-insertion
  */
-SP_API void bmt_AppendLong(BMT_node* list, SPlong value);
+void bmt_AppendLong(BMT_node* list, SPlong value);
 
 /*!
  *	@brief Appends a float-node to the given list.
@@ -799,7 +819,7 @@ SP_API void bmt_AppendLong(BMT_node* list, SPlong value);
  *
  *	@ingroup list-insertion
  */
-SP_API void bmt_AppendFloat(BMT_node* list, SPfloat value);
+void bmt_AppendFloat(BMT_node* list, SPfloat value);
 
 /*!
  *	@brief Appends a double-node to the given list.
@@ -812,7 +832,7 @@ SP_API void bmt_AppendFloat(BMT_node* list, SPfloat value);
  *
  *	@ingroup list-insertion
  */
-SP_API void bmt_AppendDouble(BMT_node* list, SPdouble value);
+void bmt_AppendDouble(BMT_node* list, SPdouble value);
 
 /*!
  *	@brief Appends a string-node to the given list.
@@ -827,7 +847,7 @@ SP_API void bmt_AppendDouble(BMT_node* list, SPdouble value);
  *
  *	@ingroup list-insertion
  */
-SP_API void bmt_AppendString(BMT_node* list, const SPchar* value);
+void bmt_AppendString(BMT_node* list, const SPchar* value);
 
 /*!
  *	@brief Appends a byte-list-node to the given list.
@@ -847,7 +867,7 @@ SP_API void bmt_AppendString(BMT_node* list, const SPchar* value);
  *
  *	@ingroup list-insertion
  */
-SP_API void bmt_AppendByteList(BMT_node* list, SPsize length, const SPbyte* values);
+void bmt_AppendByteList(BMT_node* list, SPsize length, const SPbyte* values);
 
 /*!
  *	@brief Appends a short-list-node to the given list.
@@ -867,7 +887,7 @@ SP_API void bmt_AppendByteList(BMT_node* list, SPsize length, const SPbyte* valu
  *
  *	@ingroup list-insertion
  */
-SP_API void bmt_AppendShortList(BMT_node* list, SPsize length, const SPshort* values);
+void bmt_AppendShortList(BMT_node* list, SPsize length, const SPshort* values);
 
 /*!
  *	@brief Appends an int-list-node to the given list.
@@ -887,7 +907,7 @@ SP_API void bmt_AppendShortList(BMT_node* list, SPsize length, const SPshort* va
  *
  *	@ingroup list-insertion
  */
-SP_API void bmt_AppendIntList(BMT_node* list, SPsize length, const SPint* values);
+void bmt_AppendIntList(BMT_node* list, SPsize length, const SPint* values);
 
 /*!
  *	@brief Appends a long-list-node to the given list.
@@ -907,7 +927,7 @@ SP_API void bmt_AppendIntList(BMT_node* list, SPsize length, const SPint* values
  *
  *	@ingroup list-insertion
  */
-SP_API void bmt_AppendLongList(BMT_node* list, SPsize length, const SPlong* values);
+void bmt_AppendLongList(BMT_node* list, SPsize length, const SPlong* values);
 
 /*!
  *	@brief Appends a float-list-node to the given list.
@@ -927,7 +947,7 @@ SP_API void bmt_AppendLongList(BMT_node* list, SPsize length, const SPlong* valu
  *
  *	@ingroup list-insertion
  */
-SP_API void bmt_AppendFloatList(BMT_node* list, SPsize length, const SPfloat* values);
+void bmt_AppendFloatList(BMT_node* list, SPsize length, const SPfloat* values);
 
 /*!
  *	@brief Appends a double-list-node to the given list.
@@ -947,7 +967,7 @@ SP_API void bmt_AppendFloatList(BMT_node* list, SPsize length, const SPfloat* va
  *
  *	@ingroup list-insertion
  */
-SP_API void bmt_AppendDoubleList(BMT_node* list, SPsize length, const SPdouble* values);
+void bmt_AppendDoubleList(BMT_node* list, SPsize length, const SPdouble* values);
 
 /*!
  *	@brief Appends a string-list-node to the given list.
@@ -968,7 +988,7 @@ SP_API void bmt_AppendDoubleList(BMT_node* list, SPsize length, const SPdouble* 
  *
  *	@ingroup list-insertion
  */
-SP_API void bmt_AppendStringList(BMT_node* list, SPsize length, const SPchar** values);
+void bmt_AppendStringList(BMT_node* list, SPsize length, const SPchar** values);
 
 /*!
  *	@brief Converts a contiguous array in memory to a linked list.
@@ -978,7 +998,7 @@ SP_API void bmt_AppendStringList(BMT_node* list, SPsize length, const SPchar** v
  *
  *	@ingroup list-conversion
  */
-SP_API BMT_node bmt_ToList(BMT_tag tag, SPsize length, const void* data);
+BMT_node bmt_ToList(BMT_tag tag, SPsize length, const void* data);
 
 /*!
  *	@brief Removes an element of a list at the index @param pos.
@@ -993,7 +1013,7 @@ SP_API BMT_node bmt_ToList(BMT_tag tag, SPsize length, const void* data);
  *	
  *	@ingroup list-removal
  */
-SP_API void bmt_RemoveAt(BMT_node* list, SPindex pos);
+void bmt_RemoveAt(BMT_node* list, SPindex pos);
 
 /*!
  *	@brief Dumps a tree to binary.
@@ -1006,7 +1026,7 @@ SP_API void bmt_RemoveAt(BMT_node* list, SPindex pos);
  *
  *	@ingroup tree-serialization
  */
-SP_API SPbuffer bmt_EncodeTree(const BMT_node tree);
+SPbuffer bmt_EncodeTree(const BMT_node tree);
 
 /*!
  *	@brief Reads a tree-node from a buffer in memory.
@@ -1019,7 +1039,7 @@ SP_API SPbuffer bmt_EncodeTree(const BMT_node tree);
  *
  *	@ingroup tree-deserialization
  */
-SP_API BMT_node bmt_DecodeTree(SPbuffer buffer);
+BMT_node bmt_DecodeTree(SPbuffer buffer);
 
 /*!
  *	@brief Deletes an object node.
@@ -1029,7 +1049,7 @@ SP_API BMT_node bmt_DecodeTree(SPbuffer buffer);
  *
  *	@ingroup deletion
  */
-SP_API void bmt_Delete(BMT_node* object);
+void bmt_Delete(BMT_node* object);
 
 /*!
  *	@brief Returns the last error and resets to BMT_STATUS_OK.
@@ -1038,7 +1058,7 @@ SP_API void bmt_Delete(BMT_node* object);
  *
  *	@ingroup error-signaling
  */
-SP_API BMT_status bmt_GetLastError();
+BMT_status bmt_GetLastError();
 
 /*!
  *	@brief Returns an informative error-string by @param status.
@@ -1047,7 +1067,7 @@ SP_API BMT_status bmt_GetLastError();
  *
  *	@ingroup error-signaling
  */
-SP_API const SPchar* bmt_GetErrorInfo(BMT_status status);
+const SPchar* bmt_GetErrorInfo(BMT_status status);
 #ifdef __cplusplus
 }
 #endif

@@ -7,76 +7,106 @@
  * it, you can buy us a beer in return.
  * -----------------------------------------------------------------------------
  */
-#include "bmt.h"
-#include "buffer.h"
+#include "RB/io/buffer.h"
+#include "RB/io/bmt.h"
+#include "RB/io/internal.h"
 
-#ifdef SP_COMPILER_GNUC
-#define likely(x)   __builtin_expect(!!(x), 1)
-#define unlikely(x) __builtin_expect(  (x), 0)
+#ifdef BMT_COMPILER_GNUC
+#define likely(x) __builtin_expect(!!(x), 1)
+#define unlikely(x) __builtin_expect((x), 0)
 #else
-#define likely(x)   (x)
+#define likely(x) (x)
 #define unlikely(x) (x)
 #endif
 
 static int _spLazyInit(SPbuffer* b)
 {
-    SP_ASSERT(!b->data, "Buffer already allocated");
+    assert(!b->data && "Buffer already allocated");
     SPsize capacity = 1024;
     b->data = malloc(capacity);
     b->length = 0;
     b->capacity = capacity;
-    
-    return unlikely(!b->data) ? SP_FALSE : SP_TRUE;
+
+    return unlikely(!b->data) ? BMT_FALSE : BMT_TRUE;
 }
 
 void spBufferFree(SPbuffer* b)
 {
-	if(b->data)
-	{
-		free(b->data);
-		b->data = NULL;
-		b->length = b->capacity = 0;
-	}
+    if (b->data)
+    {
+        free(b->data);
+        b->data = NULL;
+        b->length = b->capacity = 0;
+    }
 }
 
 SPbool spBufferReserve(SPbuffer* b, SPsize reserved)
 {
-    SP_ASSERT(b, "Cannot reserve for NULL");
-    if(unlikely(!b->data) && unlikely(!_spLazyInit(b)))
+    assert(b && "Cannot reserve for NULL");
+
+    // Early bounds check before any allocation
+    if (reserved > BMT_MAX_BUFFER_SIZE)
     {
-        return SP_FALSE;
+        return BMT_FALSE;
     }
-    if(likely(b->capacity >= reserved))
-        return SP_TRUE;
-    
-    while(b->capacity < reserved)
-        b->capacity *= 2;
-    
-    unsigned char* tmp = realloc(b->data, b->capacity);
-    if(unlikely(!tmp))
+
+    if (unlikely(!b->data) && unlikely(!_spLazyInit(b)))
+    {
+        return BMT_FALSE;
+    }
+    if (likely(b->capacity >= reserved))
+        return BMT_TRUE;
+
+    SPsize targetCapacity = b->capacity;
+    while (targetCapacity < reserved)
+    {
+        // Check for overflow before doubling
+        if (targetCapacity > BMT_MAX_BUFFER_SIZE / 2)
+        {
+            // Would overflow, use reserved directly
+            targetCapacity = reserved;
+            break;
+        }
+        SPsize newCapacity = targetCapacity * 2;
+        if (newCapacity > BMT_MAX_BUFFER_SIZE)
+        {
+            newCapacity = reserved;
+        }
+        targetCapacity = newCapacity;
+    }
+
+    unsigned char* tmp = realloc(b->data, targetCapacity);
+    if (unlikely(!tmp))
     {
         spBufferFree(b);
-        return SP_FALSE;
+        return BMT_FALSE;
     }
-    
+
     b->data = tmp;
-    return SP_TRUE;
+    b->capacity = targetCapacity;
+    return BMT_TRUE;
 }
 
 SPbool spBufferAppend(SPbuffer* b, const void* data, SPsize n)
 {
-    SP_ASSERT(b, "Cannot append to NULL");
-    if(unlikely(!b->data) && unlikely(!_spLazyInit(b)))
+    assert(b && "Cannot append to NULL");
+    if (unlikely(!b->data) && unlikely(!_spLazyInit(b)))
     {
-        return SP_FALSE;
+        return BMT_FALSE;
     }
-    
-    if(unlikely(!spBufferReserve(b, b->length + n)))
+
+    // Check for overflow in addition before reserve
+    if (n > BMT_MAX_BUFFER_SIZE - b->length)
     {
-        return SP_FALSE;
+        return BMT_FALSE;
     }
-    
+
+    if (unlikely(!spBufferReserve(b, b->length + n)))
+    {
+        return BMT_FALSE;
+    }
+
     memcpy(b->data + b->length, data, n);
     b->length += n;
-    return SP_TRUE;
-} 
+    return BMT_TRUE;
+}

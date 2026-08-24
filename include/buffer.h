@@ -7,14 +7,12 @@
  * it, you can buy us a beer in return.
  * -----------------------------------------------------------------------------
  */
-#ifndef SP_BUFFER_H
-#define SP_BUFFER_H
-#include "platform.h"
-
+#ifndef BMT_BUFFER_H
+#define BMT_BUFFER_H
 #include "types.h"
 #include <stddef.h>
 
-#define SP_BUFFER_INIT (struct SPbuffer) {NULL, 0, 0}
+#define BMT_BUFFER_INIT (struct SPbuffer) {NULL, 0, 0}
 
 #ifdef __cplusplus
 extern "C" {
@@ -26,9 +24,9 @@ typedef struct SPbuffer
 	SPsize capacity;
 } SPbuffer;
 
-SP_API void spBufferFree(SPbuffer* b);
-SP_API SPbool spBufferReserve(SPbuffer* b, SPsize reserved);
-SP_API SPbool spBufferAppend(SPbuffer* b, const void* data, SPsize n);
+void spBufferFree(SPbuffer* b);
+SPbool spBufferReserve(SPbuffer* b, SPsize reserved);
+SPbool spBufferAppend(SPbuffer* b, const void* data, SPsize n);
 
 #ifdef __cplusplus
 }
