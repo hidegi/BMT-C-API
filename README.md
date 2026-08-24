@@ -1,27 +1,27 @@
-# BMT C-API (SP 1994)
-BMT is a lightweight library for serializing and deserializing any plain structure to binary and vice versa (similar to Mojang's NBT-format).
-BMT introduces an open format, the so called Binary Tree Object (BTO), of which's properties are explained overleaf.
+# The BMT-library (SP 1994)
+BMT (short for MoTree) is a lightweight library for serializing and deserializing any plain structure to binary and vice versa (similar to Mojang's NBT-format).
+BMT introduces an open format, the so called Binary Tree Object (BMT), of which's properties are explained overleaf.
 
 ## Motivation
-The BTO-format is intended to be a successor of Mojang's NBT-format. In a nutshell: Minecraft uses NBT-files to store arbitrary data for its game intrinsics.
+The BMT-format is intended to be a successor of Mojang's NBT-format. In a nutshell: Minecraft uses NBT-files to store arbitrary data for its game intrinsics.
 
-However, since it is unclear, whether or not NBT is currently patented by its owners, BTO is published as an open format and innovates the free use without infringement. Read this Wiki-Page for further information about NBT: https://minecraft.fandom.com/wiki/NBT_format
+However, since it is unclear, whether or not NBT is currently patented by its owners, BMT is published as an open format and innovates the free use without infringement. Read this Wiki-Page for further information about NBT: https://minecraft.fandom.com/wiki/NBT_format
 
-## BTO-Specification
-The internal layout of a BTO-file uses an RB-tree (Red-Black-Tree) for fast search, insert and delete operations. For further information about RB-trees, read the following article: https://en.wikipedia.org/wiki/Red–black_tree
+## BMT-Specification
+The internal layout of a BMT-file uses an RB-tree (Red-Black-Tree) for fast search, insert and delete operations. For further information about RB-trees, read the following article: https://en.wikipedia.org/wiki/Red–black_tree
 
-Each node in a BTO-file consists of some sort of data (the payload), as well as the length of the name-string, the name-string itself (should not exceed 255 characters), 
+Each node in a BMT-file consists of some sort of data (the payload), as well as the length of the name-string, the name-string itself (should not exceed 255 characters), 
 the tag and the colour-bit (a boolean value, where 0 is red and 1 is black).
 
-When writing a tree-object to a file, the colour-bit is masked to the 7th bit of the tag. The tag of a node gives information about the type of data stored in a BTO-file. Consequently, when reading a tree, the colour-bit will be extracted and cleared from the tag.
+When writing a tree-object to a file, the colour-bit is masked to the 7th bit of the tag. The tag of a node gives information about the type of data stored in a BMT-file. Consequently, when reading a tree, the colour-bit will be extracted and cleared from the tag.
 
-The root-structure of a BTO-file is always a tree and can never be a list, unlike JSON, where the root-structure can either be an array or a structured-object.
+The root-structure of a BMT-file is always a tree and can never be a list, unlike JSON, where the root-structure can either be an array or a structured-object.
 
-To reduce disk storage of a file, BTO files use zlib's fast compression strategy.
+To reduce disk storage of a file, BMT files use zlib's fast compression strategy.
 Read more about zlib here: https://www.zlib.net
 
 ## Data Types
-The BTO-format has knowledge of 17 different types of data that can be stored in a tree: numeric values, strings, trees and lists.\
+The BMT-format has knowledge of 17 different types of data that can be stored in a tree: numeric values, strings, trees and lists.\
 Here is an overview about the individual data types:
 | Data Type | Tag | Range | Size in Bytes | Description |
 | :---: | :---: | :---: | :---: | :---: |
@@ -43,7 +43,7 @@ Here is an overview about the individual data types:
 | Double-list | TAG_LONG_LIST | N/A | varies | List of doubles |
 | String-list | TAG_FLOAT_LIST | N/A | varies | List of strings |
 
-Please note that any lists stored in a BTO-file are implemented as a doubly-linked-list. Therefore, it disables the use of random access for specific elements at runtime.
+Please note that any lists stored in a BMT-file are implemented as a doubly-linked-list. Therefore, it disables the use of random access for specific elements at runtime.
 Because of this, the runtime performance exhibits the properties of a doubly-linked-list.
 
 | Operation | Best Case | Worst Case |
@@ -52,7 +52,7 @@ Because of this, the runtime performance exhibits the properties of a doubly-lin
 | Insert | O(1) | O(n) |
 | Delete | O(1) | O(n) |
 
-As mentioned above, any list in a BTO-file is homogenous, meaning that different data types cannot be stored together in one list. This type-safety constraint is checked by the BMT-API.
+As mentioned above, any list in a BMT-file is homogenous, meaning that different data types cannot be stored together in one list. This type-safety constraint is checked by the BMT-API.
 
 ## Tree-Balancing
 The nodes in a tree are lexicographically ordered by their name. Since an RB-tree is self-balancing, any insertions or deletions will automatically rearrange the internal order of the tree. This allows for fast operations with
@@ -66,36 +66,36 @@ an average performance of log2(n). The balancing-algorithm implemented by the BM
 ## How to use
 This section demonstrates a short example of how to create and use tree-objects with the BMT-API.
 ```C
-#include <BMT.h>
+#include <bmt.h>
 
 int main(int argc, char** argv)
 {
   BMT_node root = NULL;
-  BMT_InsertByte(&root, "byte", 1); // at first use, allocates variable "root"
-  BMT_InsertShort(&root, "short", 12);
-  BMT_InsertInt(&root, "int", 1234);
-  BMT_InsertLong(&root, "long", 12345678);
-  BMT_InsertFloat(&root, "float", 3.14159265f);
-  BMT_InsertDouble(&root, "double", 13847.8374);
-  BMT_InsertString(&root, "string", "Hello World");
+  bmt_InsertByte(&root, "byte", 1); // at first use, allocates variable "root"
+  bmt_InsertShort(&root, "short", 12);
+  bmt_InsertInt(&root, "int", 1234);
+  bmt_InsertLong(&root, "long", 12345678);
+  bmt_InsertFloat(&root, "float", 3.14159265f);
+  bmt_InsertDouble(&root, "double", 13847.8374);
+  bmt_InsertString(&root, "string", "Hello World");
 
   BMT_node subtree = NULL;
-  BMT_InsertString(&subtree, "str1", "I"); // at first use, allocates variable "subtree"
-  BMT_InsertString(&subtree, "str2", "am");
-  BMT_InsertString(&subtree, "str3", "a");
-  BMT_InsertString(&subtree, "str4", "subtree");
-  BMT_Insert(&root, "subtree", subtree);
-  BMT_Delete(&subtree); // deletes the subtree
+  bmt_InsertString(&subtree, "str1", "I"); // at first use, allocates variable "subtree"
+  bmt_InsertString(&subtree, "str2", "am");
+  bmt_InsertString(&subtree, "str3", "a");
+  bmt_InsertString(&subtree, "str4", "subtree");
+  bmt_Insert(&root, "subtree", subtree);
+  bmt_Delete(&subtree); // deletes the subtree
 
   BMT_node intList = NULL;
   for(size_t i = 0; i < 10; i++)
-    BMT_AppendInt(&intList, i + 1); // this will implicitly create an int-list
+    bmt_AppendInt(&intList, i + 1); // this will implicitly create an int-list
 
-  BMT_Insert(&root, "intList", intList);
-  BMT_Delete(&intList); // deletes the list
+  bmt_Insert(&root, "intList", intList);
+  bmt_Delete(&intList); // deletes the list
 
-  BMT_Print(root);
-  BMT_Delete(&root); // deletes the root-object
+  bmt_Print(root);
+  bmt_Delete(&root); // deletes the root-object
 
   return 0;
 }
@@ -122,8 +122,8 @@ $ ctest --output-on-failure
 ```
 
 Additionally, this project provides two example programs: 
-- A converter from JSON to BTO.
-- A pretty-print program that displays the internal layout of a BTO-file.
+- A converter from JSON to BMT.
+- A pretty-print program that displays the internal layout of a BMT-file.
 
-Be advised that under Windows, you need to copy the ```libBMT.dll``` to your tests-and examples-folder, when specifying\
+Be advised that under Windows, you need to copy the ```libbmt.dll``` to your tests-and examples-folder, when specifying\
 ```-D BUILD_SHARED_LIBS=ON```
