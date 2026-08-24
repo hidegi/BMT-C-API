@@ -1,5 +1,5 @@
 # BMT C-API (SP 1994)
-BMT (short for MoTree) is a lightweight library for serializing and deserializing any plain structure to binary and vice versa (similar to Mojang's NBT-format).
+BMT is a lightweight library for serializing and deserializing any plain structure to binary and vice versa (similar to Mojang's NBT-format).
 BMT introduces an open format, the so called Binary Tree Object (BTO), of which's properties are explained overleaf.
 
 ## Motivation
