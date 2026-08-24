@@ -6,8 +6,8 @@
 #ifndef RB_BINARY_LIST_OBJECT_H
 #define RB_BINARY_LIST_OBJECT_H
 #include "RB/config.h"
-#include "RB/io/bmt.h"
-#include "RB/io/object.h"
+#include "bmt.h"
+#include "object.h"
 #include <SFML/System/Lock.hpp>
 #include <SFML/System/Mutex.hpp>
 #include <string>
@@ -159,7 +159,7 @@ namespace rb
                 return const_iterator(nullptr);
             }
 
-            T operator[](SPsize index) const;
+            T operator[](BMT_size index) const;
 
             /* ================================================================
              * Method add
@@ -179,7 +179,7 @@ namespace rb
              *
              * ================================================================
              */
-            void add(SPsize length, const U data);
+            void add(BMT_size length, const U data);
 
             /* ================================================================
              * Method set
@@ -187,7 +187,7 @@ namespace rb
              *
              * ================================================================
              */
-            void set(SPindex index, T t);
+            void set(BMT_index index, T t);
 
             /* ================================================================
              * Method get
@@ -195,7 +195,7 @@ namespace rb
              *
              * ================================================================
              */
-            T get(SPindex index) const;
+            T get(BMT_index index) const;
 
             /* ================================================================
              * Method remove
@@ -203,7 +203,7 @@ namespace rb
              *
              * ================================================================
              */
-            void remove(SPindex index);
+            void remove(BMT_index index);
 
             /* ================================================================
              * Method size
@@ -211,21 +211,21 @@ namespace rb
              *
              * ================================================================
              */
-            SPsize size() const;
+            BMT_size size() const;
 
         private:
-            SPsize m_length;
+            BMT_size m_length;
             mutable sf::Mutex m_mutex;
     };
 
-#include "RB/io/blo.inl"
+#include "blo.inl"
 
-    using ByteList = BLO<SPbyte>;
-    using ShortList = BLO<SPshort>;
-    using IntList = BLO<SPint>;
-    using LongList = BLO<SPlong>;
-    using FloatList = BLO<SPfloat>;
-    using DoubleList = BLO<SPdouble>;
+    using ByteList = BLO<BMT_byte>;
+    using ShortList = BLO<BMT_short>;
+    using IntList = BLO<BMT_int>;
+    using LongList = BLO<BMT_long>;
+    using FloatList = BLO<BMT_float>;
+    using DoubleList = BLO<BMT_double>;
     using StringList = BLO<std::string>;
     using TreeList = BLO<BTO>;
 } // namespace rb

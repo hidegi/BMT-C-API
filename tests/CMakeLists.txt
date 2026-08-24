@@ -1,16 +1,42 @@
-set(CMAKE_WARN_DEPRECATED OFF CACHE BOOL "" FORCE)
+#-----------------------------------------------------------------------------
+# BMT Test Suite Configuration
+# Tests for the BMT C-API
+#-----------------------------------------------------------------------------
+
+#-----------------------------------------------------------------------------
+# Google Test Setup
+#-----------------------------------------------------------------------------
 include(FetchContent)
 FetchContent_Declare(
-	googletest
-	GIT_REPOSITORY https://github.com/google/googletest.git
-	GIT_TAG release-1.11.0
+    googletest
+    GIT_REPOSITORY https://github.com/google/googletest.git
+    GIT_TAG        v1.14.0
+    GIT_SHALLOW    TRUE
 )
+set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+set(CMAKE_WARN_DEPRECATED OFF CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(googletest)
-add_library(GTest::GTest INTERFACE IMPORTED)
-target_link_libraries(GTest::GTest INTERFACE gtest_main)
-add_executable(mt3_simple_test mt3_simple_test.cpp)
-target_link_libraries(mt3_simple_test 
-	PRIVATE 
-	GTest::GTest
-	mt3)
-add_test(mt3_simple_test mt3_simple_test)
+include(GoogleTest)
+
+#-----------------------------------------------------------------------------
+# Test Suite — BMT C-API
+#-----------------------------------------------------------------------------
+
+# Basic allocation and insertion tests (custom framework, own main)
+bmt_add_test(test_bmt_basic
+    SOURCES test_bmt_basic.cpp
+    DEPENDS bmt
+)
+
+# Tree structure and RBT validation tests (custom framework, own main)
+bmt_add_test(test_bmt_trees
+    SOURCES test_bmt_trees.cpp
+    DEPENDS bmt
+)
+
+# Comprehensive insertion, deletion, and serialization tests (Google Test)
+bmt_add_test(test_bmt_comprehensive
+    SOURCES test_bmt_comprehensive.cpp
+    DEPENDS bmt
+    GTEST
+)

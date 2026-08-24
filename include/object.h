@@ -5,8 +5,8 @@
  */
 #ifndef RB_BINARY_OBJECT_H
 #define RB_BINARY_OBJECT_H
-#include "RB/config.h"
-#include "RB/io/bmt.h"
+#include "platform.h"
+#include "bmt.h"
 #include <string>
 #include <type_traits>
 
@@ -106,7 +106,7 @@ namespace rb
              *
              * ================================================================
              */
-            void checkErrors(const SPchar* file, SPuint line, const SPchar* expression) const;
+            void checkErrors(const BMT_char* file, BMT_uint line, const BMT_char* expression) const;
 
             /* ================================================================
              * Method listAt
@@ -114,7 +114,7 @@ namespace rb
              *
              * ================================================================
              */
-            static BMT_node listAt(BMT_node list, SPindex at);
+            static BMT_node listAt(BMT_node list, BMT_index at);
 
             friend class BTO;
 

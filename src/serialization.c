@@ -20,7 +20,7 @@
  * 3. This notice may not be removed or altered from any source
  * distribution.
  ****************************************************************************/
-#include "RB/io/internal.h"
+#include "internal.h"
 #include <zlib.h>
 
 #if defined(BMT_COMPILER_CLANG) || defined(BMT_COMPILER_GNUC)
@@ -44,46 +44,46 @@
 #define ne2be _bmt_big_endian_to_native_endian
 #define be2ne _bmt_big_endian_to_native_endian
 
-static SPbool _bmt_is_little_endian()
+static BMT_bool _bmt_is_little_endian()
 {
-    SPuint16 t = 0x0001;
-    SPchar c[2];
+    BMT_uint16 t = 0x0001;
+    BMT_char c[2];
     memcpy(c, &t, sizeof t);
     return c[0];
 }
 
-static void* _bmt_swap_bytes(void* s, SPsize length)
+static void* _bmt_swap_bytes(void* s, BMT_size length)
 {
-    for (SPchar *b = s, *e = b + length - 1; b < e; b++, e--)
+    for (BMT_char *b = s, *e = b + length - 1; b < e; b++, e--)
     {
-        SPchar t = *b;
+        BMT_char t = *b;
         *b = *e;
         *e = t;
     }
     return s;
 }
 
-static void* _bmt_big_endian_to_native_endian(void* s, SPsize len)
+static void* _bmt_big_endian_to_native_endian(void* s, BMT_size len)
 {
     return _bmt_is_little_endian() ? _bmt_swap_bytes(s, len) : s;
 }
 
-static const void* _bmt_memcpy(void* dst, const void* src, SPsize n)
+static const void* _bmt_memcpy(void* dst, const void* src, BMT_size n)
 {
     memcpy(dst, src, n);
-    return (const SPchar*)src + n;
+    return (const BMT_char*)src + n;
 }
 
-static const void* _bmt_swapped_memcpy(void* dst, const void* src, SPsize n)
+static const void* _bmt_swapped_memcpy(void* dst, const void* src, BMT_size n)
 {
     const void* ret = _bmt_memcpy(dst, src, n);
     return ne2be(dst, n), ret;
 }
 
-SPbuffer _bmt_compress(const void* memory, SPsize length)
+BMT_buffer _bmt_compress(const void* memory, BMT_size length)
 {
-    const SPsize CHUNK_SIZE = 4096;
-    SPbuffer buffer = BMT_BUFFER_INIT;
+    const BMT_size CHUNK_SIZE = 4096;
+    BMT_buffer buffer = BMT_BUFFER_INIT;
 
     z_stream stream = {
         .zalloc = Z_NULL, .zfree = Z_NULL, .opaque = Z_NULL, .next_in = (void*)memory, .avail_in = length};
@@ -103,10 +103,10 @@ SPbuffer _bmt_compress(const void* memory, SPsize length)
 
     do
     {
-        if (!spBufferReserve(&buffer, buffer.length + CHUNK_SIZE))
+        if (!bmt_BufferReserve(&buffer, buffer.length + CHUNK_SIZE))
         {
             bmt_error_flag = BMT_STATUS_NO_MEMORY;
-            spBufferFree(&buffer);
+            bmt_BufferFree(&buffer);
             return BMT_BUFFER_INIT;
         }
 
@@ -116,7 +116,7 @@ SPbuffer _bmt_compress(const void* memory, SPsize length)
         if (deflate(&stream, Z_FINISH) == Z_STREAM_ERROR)
         {
             bmt_error_flag = BMT_STATUS_WRITE_ERROR;
-            spBufferFree(&buffer);
+            bmt_BufferFree(&buffer);
             return BMT_BUFFER_INIT;
         }
 
@@ -127,10 +127,10 @@ SPbuffer _bmt_compress(const void* memory, SPsize length)
     return buffer;
 }
 
-SPbuffer _bmt_decompress(const void* memory, SPsize length)
+BMT_buffer _bmt_decompress(const void* memory, BMT_size length)
 {
-    const SPsize CHUNK_SIZE = 4096;
-    SPbuffer buffer = BMT_BUFFER_INIT;
+    const BMT_size CHUNK_SIZE = 4096;
+    BMT_buffer buffer = BMT_BUFFER_INIT;
 
     z_stream stream = {
         .zalloc = Z_NULL, .zfree = Z_NULL, .opaque = Z_NULL, .next_in = (void*)memory, .avail_in = length};
@@ -141,13 +141,13 @@ SPbuffer _bmt_decompress(const void* memory, SPsize length)
         return BMT_BUFFER_INIT;
     }
 
-    SPint zlib_ret;
+    BMT_int zlib_ret;
     do
     {
-        if (!spBufferReserve(&buffer, buffer.length + CHUNK_SIZE))
+        if (!bmt_BufferReserve(&buffer, buffer.length + CHUNK_SIZE))
         {
             bmt_error_flag = BMT_STATUS_NO_MEMORY;
-            spBufferFree(&buffer);
+            bmt_BufferFree(&buffer);
             inflateEnd(&stream);
             return BMT_BUFFER_INIT;
         }
@@ -156,7 +156,7 @@ SPbuffer _bmt_decompress(const void* memory, SPsize length)
         if (buffer.length > BMT_MAX_DECOMPRESSED_SIZE)
         {
             bmt_error_flag = BMT_STATUS_READ_ERROR;
-            spBufferFree(&buffer);
+            bmt_BufferFree(&buffer);
             inflateEnd(&stream);
             return BMT_BUFFER_INIT;
         }
@@ -166,13 +166,13 @@ SPbuffer _bmt_decompress(const void* memory, SPsize length)
         if (length > 0 && buffer.length > length * 100)
         {
             bmt_error_flag = BMT_STATUS_READ_ERROR;
-            spBufferFree(&buffer);
+            bmt_BufferFree(&buffer);
             inflateEnd(&stream);
             return BMT_BUFFER_INIT;
         }
 
         stream.avail_out = CHUNK_SIZE;
-        stream.next_out = (SPubyte*)buffer.data + buffer.length;
+        stream.next_out = (BMT_ubyte*)buffer.data + buffer.length;
 
         switch ((zlib_ret = inflate(&stream, Z_NO_FLUSH)))
         {
@@ -181,7 +181,7 @@ SPbuffer _bmt_decompress(const void* memory, SPsize length)
             case Z_NEED_DICT:
             {
                 bmt_error_flag = BMT_STATUS_READ_ERROR;
-                spBufferFree(&buffer);
+                bmt_BufferFree(&buffer);
                 inflateEnd(&stream);
                 return BMT_BUFFER_INIT;
             }
@@ -193,7 +193,7 @@ SPbuffer _bmt_decompress(const void* memory, SPsize length)
     if (zlib_ret != Z_STREAM_END)
     {
         bmt_error_flag = BMT_STATUS_READ_ERROR;
-        spBufferFree(&buffer);
+        bmt_BufferFree(&buffer);
         inflateEnd(&stream);
         return BMT_BUFFER_INIT;
     }
@@ -202,7 +202,7 @@ SPbuffer _bmt_decompress(const void* memory, SPsize length)
     return buffer;
 }
 
-static void* _bmt_alloc_chunk(SPsize size)
+static void* _bmt_alloc_chunk(BMT_size size)
 {
     // Prevent unbounded allocations
     if (size > BMT_MAX_BUFFER_SIZE)
@@ -211,12 +211,12 @@ static void* _bmt_alloc_chunk(SPsize size)
         return NULL;
     }
 
-    SPbyte* ptr = NULL;
-    BMT_CHECKED_CALLOC(ptr, size, sizeof(SPbyte), return NULL);
+    BMT_byte* ptr = NULL;
+    BMT_CHECKED_CALLOC(ptr, size, sizeof(BMT_byte), return NULL);
     return ptr;
 }
 
-static void _bmt_write_bytes(SPbuffer* buffer, const SPubyte* src, SPsize length, SPbool toNativeEndian, int level)
+static void _bmt_write_bytes(BMT_buffer* buffer, const BMT_ubyte* src, BMT_size length, BMT_bool toNativeEndian, int level)
 {
     if (!buffer || !src)
     {
@@ -224,7 +224,7 @@ static void _bmt_write_bytes(SPbuffer* buffer, const SPubyte* src, SPsize length
         return;
     }
 
-    SPubyte* chunk = _bmt_alloc_chunk(length);
+    BMT_ubyte* chunk = _bmt_alloc_chunk(length);
     if (!chunk)
     {
         bmt_error_flag = BMT_STATUS_NO_MEMORY;
@@ -236,7 +236,7 @@ static void _bmt_write_bytes(SPbuffer* buffer, const SPubyte* src, SPsize length
     else
         _bmt_memcpy(chunk, src, length);
 
-    if (!spBufferAppend(buffer, chunk, length))
+    if (!bmt_BufferAppend(buffer, chunk, length))
     {
         free(chunk);
         bmt_error_flag = BMT_STATUS_WRITE_ERROR;
@@ -246,34 +246,34 @@ static void _bmt_write_bytes(SPbuffer* buffer, const SPubyte* src, SPsize length
     free(chunk);
 }
 
-static void _bmt_encode(const BMT_node node, SPbuffer* buffer, int level)
+static void _bmt_encode(const BMT_node node, BMT_buffer* buffer, int level)
 {
     if (node)
     {
         switch (node->tag)
         {
             case BMT_TAG_BYTE:
-                _bmt_write_bytes(buffer, (const SPubyte*)&node->payload.tag_byte, sizeof(SPbyte), BMT_TRUE, level);
+                _bmt_write_bytes(buffer, (const BMT_ubyte*)&node->payload.tag_byte, sizeof(BMT_byte), BMT_TRUE, level);
                 break;
             case BMT_TAG_SHORT:
-                _bmt_write_bytes(buffer, (const SPubyte*)&node->payload.tag_short, sizeof(SPshort), BMT_TRUE, level);
+                _bmt_write_bytes(buffer, (const BMT_ubyte*)&node->payload.tag_short, sizeof(BMT_short), BMT_TRUE, level);
                 break;
             case BMT_TAG_INT:
-                _bmt_write_bytes(buffer, (const SPubyte*)&node->payload.tag_int, sizeof(SPint), BMT_TRUE, level);
+                _bmt_write_bytes(buffer, (const BMT_ubyte*)&node->payload.tag_int, sizeof(BMT_int), BMT_TRUE, level);
                 break;
             case BMT_TAG_LONG:
-                _bmt_write_bytes(buffer, (const SPubyte*)&node->payload.tag_long, sizeof(SPlong), BMT_TRUE, level);
+                _bmt_write_bytes(buffer, (const BMT_ubyte*)&node->payload.tag_long, sizeof(BMT_long), BMT_TRUE, level);
                 break;
             case BMT_TAG_FLOAT:
-                _bmt_write_bytes(buffer, (const SPubyte*)&node->payload.tag_float, sizeof(SPfloat), BMT_TRUE, level);
+                _bmt_write_bytes(buffer, (const BMT_ubyte*)&node->payload.tag_float, sizeof(BMT_float), BMT_TRUE, level);
                 break;
             case BMT_TAG_DOUBLE:
-                _bmt_write_bytes(buffer, (const SPubyte*)&node->payload.tag_double, sizeof(SPdouble), BMT_TRUE, level);
+                _bmt_write_bytes(buffer, (const BMT_ubyte*)&node->payload.tag_double, sizeof(BMT_double), BMT_TRUE, level);
                 break;
             case BMT_TAG_STRING:
             {
-                _bmt_write_bytes(buffer, (const SPubyte*)&node->length, sizeof(SPsize), BMT_TRUE, level);
-                _bmt_write_bytes(buffer, (const SPubyte*)node->payload.tag_string, node->length, BMT_FALSE, level);
+                _bmt_write_bytes(buffer, (const BMT_ubyte*)&node->length, sizeof(BMT_size), BMT_TRUE, level);
+                _bmt_write_bytes(buffer, (const BMT_ubyte*)node->payload.tag_string, node->length, BMT_FALSE, level);
                 break;
             }
 
@@ -285,8 +285,8 @@ static void _bmt_encode(const BMT_node node, SPbuffer* buffer, int level)
 
             default:
             {
-                SPsize length = _bmt_length_of_list(node->payload.tag_object);
-                _bmt_write_bytes(buffer, (const SPubyte*)&node->length, sizeof(SPsize), BMT_TRUE, level);
+                BMT_size length = _bmt_length_of_list(node->payload.tag_object);
+                _bmt_write_bytes(buffer, (const BMT_ubyte*)&node->length, sizeof(BMT_size), BMT_TRUE, level);
                 _bmt_encode_list(node->payload.tag_object, buffer, level);
                 break;
             }
@@ -294,22 +294,22 @@ static void _bmt_encode(const BMT_node node, SPbuffer* buffer, int level)
     }
 }
 
-void _bmt_encode_tree(const BMT_node tree, SPbuffer* buffer, int level)
+void _bmt_encode_tree(const BMT_node tree, BMT_buffer* buffer, int level)
 {
     if (!tree)
     {
         BMT_tag null = BMT_TAG_NULL;
-        _bmt_write_bytes(buffer, (const SPubyte*)&null, sizeof(SPbyte), BMT_FALSE, level);
+        _bmt_write_bytes(buffer, (const BMT_ubyte*)&null, sizeof(BMT_byte), BMT_FALSE, level);
         return;
     }
 
     // encode the tag
-    SPuint8 tag = tree->tag | ((tree->red & 1) << 6);
-    _bmt_write_bytes(buffer, (const SPubyte*)&tag, sizeof(SPbyte), BMT_FALSE, level);
+    BMT_uint8 tag = tree->tag | ((tree->red & 1) << 6);
+    _bmt_write_bytes(buffer, (const BMT_ubyte*)&tag, sizeof(BMT_byte), BMT_FALSE, level);
 
     // encode the name
-    _bmt_write_bytes(buffer, &tree->nameLength, sizeof(SPubyte), BMT_FALSE, level);
-    _bmt_write_bytes(buffer, (const SPubyte*)tree->name, tree->nameLength, BMT_FALSE, level);
+    _bmt_write_bytes(buffer, &tree->nameLength, sizeof(BMT_ubyte), BMT_FALSE, level);
+    _bmt_write_bytes(buffer, (const BMT_ubyte*)tree->name, tree->nameLength, BMT_FALSE, level);
 
     // encode generic
     _bmt_encode(tree, buffer, level);
@@ -318,29 +318,29 @@ void _bmt_encode_tree(const BMT_node tree, SPbuffer* buffer, int level)
     _bmt_encode_tree(tree->minor, buffer, level + 1);
 }
 
-void _bmt_encode_list(const BMT_node list, SPbuffer* buffer, int level)
+void _bmt_encode_list(const BMT_node list, BMT_buffer* buffer, int level)
 {
     if (list)
     {
         BMT_node cursor = NULL;
-        SPsize i = 0;
+        BMT_size i = 0;
 
         for (cursor = list; cursor != NULL; cursor = cursor->major)
         {
             if (cursor->tag & BMT_TAG_LIST)
             {
                 // encode the tag, if it is a multi-list
-                SPuint8 tag = list->tag | ((list->red & 1) << 6);
-                _bmt_write_bytes(buffer, (const SPubyte*)&tag, sizeof(SPbyte), BMT_FALSE, level);
+                BMT_uint8 tag = list->tag | ((list->red & 1) << 6);
+                _bmt_write_bytes(buffer, (const BMT_ubyte*)&tag, sizeof(BMT_byte), BMT_FALSE, level);
             }
             _bmt_encode(cursor, buffer, level);
         }
     }
 }
 
-SPbuffer bmt_EncodeTree(const BMT_node tree)
+BMT_buffer bmt_EncodeTree(const BMT_node tree)
 {
-    SPbuffer buffer = BMT_BUFFER_INIT;
+    BMT_buffer buffer = BMT_BUFFER_INIT;
 
     if (!bmt_IsTree(tree))
     {
@@ -350,46 +350,46 @@ SPbuffer bmt_EncodeTree(const BMT_node tree)
 
     _bmt_update(tree);
     _bmt_encode_tree(tree, &buffer, 0);
-    SPbuffer compressed = _bmt_compress(buffer.data, buffer.length);
-    spBufferFree(&buffer);
+    BMT_buffer compressed = _bmt_compress(buffer.data, buffer.length);
+    bmt_BufferFree(&buffer);
     return compressed;
 }
 
-static SPbool _bmt_decode(BMT_node node, const SPubyte** memory, SPsize* length)
+static BMT_bool _bmt_decode(BMT_node node, const BMT_ubyte** memory, BMT_size* length)
 {
     if (node)
     {
         switch (node->tag)
         {
             case BMT_TAG_BYTE:
-                BMT_READ_GENERIC(&node->payload.tag_byte, sizeof(SPbyte), _bmt_swapped_memcpy, return BMT_FALSE);
-                node->length = sizeof(SPbyte);
+                BMT_READ_GENERIC(&node->payload.tag_byte, sizeof(BMT_byte), _bmt_swapped_memcpy, return BMT_FALSE);
+                node->length = sizeof(BMT_byte);
                 break;
             case BMT_TAG_SHORT:
-                BMT_READ_GENERIC(&node->payload.tag_short, sizeof(SPshort), _bmt_swapped_memcpy, return BMT_FALSE);
-                node->length = sizeof(SPshort);
+                BMT_READ_GENERIC(&node->payload.tag_short, sizeof(BMT_short), _bmt_swapped_memcpy, return BMT_FALSE);
+                node->length = sizeof(BMT_short);
                 break;
             case BMT_TAG_INT:
-                BMT_READ_GENERIC(&node->payload.tag_int, sizeof(SPint), _bmt_swapped_memcpy, return BMT_FALSE);
-                node->length = sizeof(SPint);
+                BMT_READ_GENERIC(&node->payload.tag_int, sizeof(BMT_int), _bmt_swapped_memcpy, return BMT_FALSE);
+                node->length = sizeof(BMT_int);
                 break;
             case BMT_TAG_LONG:
-                BMT_READ_GENERIC(&node->payload.tag_long, sizeof(SPlong), _bmt_swapped_memcpy, return BMT_FALSE);
-                node->length = sizeof(SPlong);
+                BMT_READ_GENERIC(&node->payload.tag_long, sizeof(BMT_long), _bmt_swapped_memcpy, return BMT_FALSE);
+                node->length = sizeof(BMT_long);
                 break;
             case BMT_TAG_FLOAT:
-                BMT_READ_GENERIC(&node->payload.tag_float, sizeof(SPfloat), _bmt_swapped_memcpy, return BMT_FALSE);
-                node->length = sizeof(SPfloat);
+                BMT_READ_GENERIC(&node->payload.tag_float, sizeof(BMT_float), _bmt_swapped_memcpy, return BMT_FALSE);
+                node->length = sizeof(BMT_float);
                 break;
             case BMT_TAG_DOUBLE:
-                BMT_READ_GENERIC(&node->payload.tag_double, sizeof(SPdouble), _bmt_swapped_memcpy, return BMT_FALSE);
-                node->length = sizeof(SPdouble);
+                BMT_READ_GENERIC(&node->payload.tag_double, sizeof(BMT_double), _bmt_swapped_memcpy, return BMT_FALSE);
+                node->length = sizeof(BMT_double);
                 break;
             case BMT_TAG_STRING:
             {
                 // Read as signed integer first to detect negative values
-                SPlong stringLength;
-                BMT_READ_GENERIC(&stringLength, sizeof(SPlong), _bmt_swapped_memcpy, return BMT_FALSE);
+                BMT_long stringLength;
+                BMT_READ_GENERIC(&stringLength, sizeof(BMT_long), _bmt_swapped_memcpy, return BMT_FALSE);
                 // Strict bounds check: must be non-negative and leave room for +1 without overflow
                 if (stringLength < 0 || stringLength >= BMT_MAX_STRING_LENGTH)
                 {
@@ -397,8 +397,8 @@ static SPbool _bmt_decode(BMT_node node, const SPubyte** memory, SPsize* length)
                     return BMT_FALSE;
                 }
                 // Safe to assign to unsigned now
-                node->length = (SPsize)stringLength;
-                BMT_CHECKED_CALLOC(node->payload.tag_string, node->length + 1, sizeof(SPbyte), return BMT_FALSE);
+                node->length = (BMT_size)stringLength;
+                BMT_CHECKED_CALLOC(node->payload.tag_string, node->length + 1, sizeof(BMT_byte), return BMT_FALSE);
                 BMT_READ_GENERIC(node->payload.tag_string, node->length, _bmt_memcpy, return BMT_FALSE);
                 node->payload.tag_string[node->length] = 0;
                 break;
@@ -419,12 +419,12 @@ static SPbool _bmt_decode(BMT_node node, const SPubyte** memory, SPsize* length)
     return BMT_TRUE;
 }
 
-BMT_node _bmt_decode_tree(const SPubyte** memory, SPsize* length)
+BMT_node _bmt_decode_tree(const BMT_ubyte** memory, BMT_size* length)
 {
-    SPubyte tag;
-    BMT_READ_GENERIC(&tag, sizeof(SPubyte), _bmt_memcpy, return NULL);
+    BMT_ubyte tag;
+    BMT_READ_GENERIC(&tag, sizeof(BMT_ubyte), _bmt_memcpy, return NULL);
 
-    SPbool redness = (tag >> 6) & 1;
+    BMT_bool redness = (tag >> 6) & 1;
     tag &= ~0x40;
 
     if (tag == BMT_TAG_NULL)
@@ -433,11 +433,11 @@ BMT_node _bmt_decode_tree(const SPubyte** memory, SPsize* length)
     BMT_node tree;
     BMT_CHECKED_CALLOC(tree, 1, sizeof(struct _BMT_node), return NULL);
 
-    BMT_READ_GENERIC(&tree->nameLength, sizeof(SPubyte), _bmt_memcpy, {
+    BMT_READ_GENERIC(&tree->nameLength, sizeof(BMT_ubyte), _bmt_memcpy, {
         free(tree);
         return NULL;
     });
-    BMT_CHECKED_CALLOC(tree->name, tree->nameLength + 1, sizeof(SPchar), {
+    BMT_CHECKED_CALLOC(tree->name, tree->nameLength + 1, sizeof(BMT_char), {
         free(tree);
         return NULL;
     });
@@ -469,12 +469,12 @@ BMT_node _bmt_decode_tree(const SPubyte** memory, SPsize* length)
     return tree;
 }
 
-SPbool _bmt_decode_list(BMT_node node, const SPubyte** memory, SPsize* length)
+BMT_bool _bmt_decode_list(BMT_node node, const BMT_ubyte** memory, BMT_size* length)
 {
     if (!node)
         return BMT_FALSE;
 
-    BMT_READ_GENERIC(&node->length, sizeof(SPlong), _bmt_swapped_memcpy, return BMT_FALSE);
+    BMT_READ_GENERIC(&node->length, sizeof(BMT_long), _bmt_swapped_memcpy, return BMT_FALSE);
     // Bounds check to prevent memory exhaustion
     if (node->length < 0 || node->length > BMT_MAX_LIST_LENGTH)
     {
@@ -486,13 +486,13 @@ SPbool _bmt_decode_list(BMT_node node, const SPubyte** memory, SPsize* length)
         BMT_node array = bmt_AllocList();
         BMT_node cursor = array;
 
-        for (SPsize i = 0; i < node->length; i++)
+        for (BMT_size i = 0; i < node->length; i++)
         {
-            SPubyte tag;
-            SPbool redness = BMT_FALSE;
+            BMT_ubyte tag;
+            BMT_bool redness = BMT_FALSE;
             if (node->tag == BMT_TAG_LIST)
             {
-                BMT_READ_GENERIC(&tag, sizeof(SPbyte), _bmt_memcpy, return BMT_FALSE);
+                BMT_READ_GENERIC(&tag, sizeof(BMT_byte), _bmt_memcpy, return BMT_FALSE);
                 redness = (tag >> 6) & 1;
                 if (!redness)
                 {
@@ -531,12 +531,12 @@ SPbool _bmt_decode_list(BMT_node node, const SPubyte** memory, SPsize* length)
     return BMT_TRUE;
 }
 
-BMT_node bmt_DecodeTree(SPbuffer buffer)
+BMT_node bmt_DecodeTree(BMT_buffer buffer)
 {
-    SPbuffer decompressed = _bmt_decompress(buffer.data, buffer.length);
-    const SPubyte* memory = decompressed.data;
-    BMT_node ret = _bmt_decode_tree((const SPubyte**)&memory, &decompressed.length);
-    spBufferFree(&decompressed);
+    BMT_buffer decompressed = _bmt_decompress(buffer.data, buffer.length);
+    const BMT_ubyte* memory = decompressed.data;
+    BMT_node ret = _bmt_decode_tree((const BMT_ubyte**)&memory, &decompressed.length);
+    bmt_BufferFree(&decompressed);
     return ret;
 }
 #if defined(BMT_COMPILER_CLANG) || defined(BMT_COMPILER_GNUC)

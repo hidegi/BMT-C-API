@@ -20,35 +20,35 @@
  * 3. This notice may not be removed or altered from any source
  * distribution.
  ****************************************************************************/
-#ifndef BMTPLATFORM_H
-#define BMTPLATFORM_H
+#ifndef MT3_PLATFORM_H
+#define MT3_PLATFORM_H
 
-#define BMTVERSION_MAJOR 2
-#define BMTVERSION_MINOR 0
-#define BMTVERSION_PATCH 2
+#define BMT_VERSION_MAJOR 2
+#define BMT_VERSION_MINOR 0
+#define BMT_VERSION_PATCH 2
 
-#define BMTHAVE_BST_MAJOR_INCLINED
-#define SP_STATIC_BUILD
-/* #undef SP_PLATFORM_WINDOWS */
-/* #undef SP_PLATFORM_MACOS */
-#define SP_PLATFORM_LINUX
+#define BMT_HAVE_BST_MAJOR_INCLINED
+#define BMT_STATIC_BUILD
+/* #undef BMT_PLATFORM_WINDOWS */
+/* #undef BMT_PLATFORM_MACOS */
+#define BMT_PLATFORM_LINUX
 
-#ifndef SP_STATIC_BUILD
-	#if defined(SP_PLATFORM_WINDOWS)
-		#define SP_API __declspec(dllexport)
+#ifndef BMT_STATIC_BUILD
+	#if defined(BMT_PLATFORM_WINDOWS)
+		#define BMT_API __declspec(dllexport)
 	#else
-		#define SP_API __attribute__((visibility("default")))
+		#define BMT_API __attribute__((visibility("default")))
 	#endif
 #else
-	#define SP_API
+	#define BMT_API
 #endif
 
 #if defined(__clang__)
-#define SP_COMPILER_CLANG
+#define BMT_COMPILER_CLANG
 #elif defined(__GNUC__) || defined(__GNUC__)
-#define SP_COMPILER_GNUC
+#define BMT_COMPILER_GNUC
 #elif defined(_MSC_VER)
-#define SP_COMPILER_MSC
+#define BMT_COMPILER_MSC
 #endif
 
 #endif

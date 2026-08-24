@@ -22,40 +22,40 @@
  ****************************************************************************/
 #ifndef BMT_TYPES_H
 #define BMT_TYPES_H
-typedef float SPfloat;
-typedef double SPdouble;
+typedef float BMT_float;
+typedef double BMT_double;
 
-typedef char SPchar;
-typedef unsigned char SPuchar;
-typedef signed char SPint8;
-typedef unsigned char SPuint8;
-typedef SPint8 SPbyte;
-typedef SPuint8 SPubyte;
+typedef char BMT_char;
+typedef unsigned char BMT_uchar;
+typedef signed char BMT_int8;
+typedef unsigned char BMT_uint8;
+typedef BMT_int8 BMT_byte;
+typedef BMT_uint8 BMT_ubyte;
 
-typedef signed short SPint16;
-typedef unsigned short SPuint16;
-typedef SPint16 SPshort;
-typedef SPuint16 SPushort;
+typedef signed short BMT_int16;
+typedef unsigned short BMT_uint16;
+typedef BMT_int16 BMT_short;
+typedef BMT_uint16 BMT_ushort;
 
 #define BMT_FALSE 0
 #define BMT_TRUE 1
-typedef signed int SPint32;
-typedef unsigned int SPuint32;
-typedef SPint32 SPint;
-typedef SPuint32 SPuint;
-typedef SPint SPbool;
+typedef signed int BMT_int32;
+typedef unsigned int BMT_uint32;
+typedef BMT_int32 BMT_int;
+typedef BMT_uint32 BMT_uint;
+typedef BMT_int BMT_bool;
 
 #if defined(BMT_MSC_VER)
-typedef signed __int64 SPint64;
-typedef unsigned __int64 SPuint64;
+typedef signed __int64 BMT_int64;
+typedef unsigned __int64 BMT_uint64;
 #else
-typedef signed long long SPint64;
-typedef unsigned long long SPuint64;
+typedef signed long long BMT_int64;
+typedef unsigned long long BMT_uint64;
 #endif // defined
-typedef SPint64 SPlong;
-typedef SPuint64 SPulong;
+typedef BMT_int64 BMT_long;
+typedef BMT_uint64 BMT_ulong;
 
-typedef SPulong SPsize;
-typedef SPsize SPindex;
-typedef SPulong SPhash;
+typedef BMT_ulong BMT_size;
+typedef BMT_size BMT_index;
+typedef BMT_ulong BMT_hash;
 #endif

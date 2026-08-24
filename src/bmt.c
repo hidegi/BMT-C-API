@@ -20,7 +20,7 @@
  * 3. This notice may not be removed or altered from any source
  * distribution.
  ****************************************************************************/
-#include "RB/io/internal.h"
+#include "internal.h"
 #include <math.h>
 #include <stdarg.h>
 #include <stdint.h>
@@ -63,9 +63,9 @@
 
 BMT_THREAD_LOCAL BMT_status bmt_error_flag = BMT_STATUS_OK;
 
-SPbool bmt_IsTree(const BMT_node node)
+BMT_bool bmt_IsTree(const BMT_node node)
 {
-    SPbool ret = BMT_FALSE;
+    BMT_bool ret = BMT_FALSE;
     if (node)
     {
         ret = (node->parent == NULL) && !node->red;
@@ -73,9 +73,9 @@ SPbool bmt_IsTree(const BMT_node node)
     return ret;
 }
 
-SPbool bmt_IsList(const BMT_node node)
+BMT_bool bmt_IsList(const BMT_node node)
 {
-    SPbool ret = BMT_FALSE;
+    BMT_bool ret = BMT_FALSE;
     if (node)
     {
         ret = (node->parent == NULL) && node->red;
@@ -83,13 +83,13 @@ SPbool bmt_IsList(const BMT_node node)
     return ret;
 }
 
-SPbool _bmt_is_name_valid(const SPchar* name)
+BMT_bool _bmt_is_name_valid(const BMT_char* name)
 {
     if (!name)
         return BMT_FALSE;
 
-    SPsize length = strlen(name);
-    return (length > 0) && (length <= ((SPubyte)0xFF));
+    BMT_size length = strlen(name);
+    return (length > 0) && (length <= ((BMT_ubyte)0xFF));
 }
 
 static BMT_tag _bmt_get_object_tag(const BMT_node value)
@@ -117,7 +117,7 @@ static BMT_tag _bmt_get_object_tag(const BMT_node value)
     return tag;
 }
 
-static BMT_node _bmt_alloc_node(BMT_tag tag, const SPchar* name, SPsize length, const void* value, SPbool copyValue)
+static BMT_node _bmt_alloc_node(BMT_tag tag, const BMT_char* name, BMT_size length, const void* value, BMT_bool copyValue)
 {
     BMT_node node = NULL;
     BMT_CHECKED_CALLOC(node, 1, sizeof(struct _BMT_node), return NULL);
@@ -136,26 +136,26 @@ static BMT_node _bmt_alloc_node(BMT_tag tag, const SPchar* name, SPsize length, 
         case BMT_TAG_NULL:
             break;
         case BMT_TAG_BYTE:
-            node->payload.tag_byte = *(const SPbyte*)value;
+            node->payload.tag_byte = *(const BMT_byte*)value;
             break;
         case BMT_TAG_SHORT:
-            node->payload.tag_short = *(const SPshort*)value;
+            node->payload.tag_short = *(const BMT_short*)value;
             break;
         case BMT_TAG_INT:
-            node->payload.tag_int = *(const SPint*)value;
+            node->payload.tag_int = *(const BMT_int*)value;
             break;
         case BMT_TAG_LONG:
-            node->payload.tag_long = *(const SPlong*)value;
+            node->payload.tag_long = *(const BMT_long*)value;
             break;
         case BMT_TAG_FLOAT:
-            node->payload.tag_float = *(const SPfloat*)value;
+            node->payload.tag_float = *(const BMT_float*)value;
             break;
         case BMT_TAG_DOUBLE:
-            node->payload.tag_double = *(const SPdouble*)value;
+            node->payload.tag_double = *(const BMT_double*)value;
             break;
         case BMT_TAG_STRING:
         {
-            _bmt_strncpy(&node->payload.tag_string, (const SPchar*)value, node->length);
+            _bmt_strncpy(&node->payload.tag_string, (const BMT_char*)value, node->length);
             break;
         }
 
@@ -168,22 +168,22 @@ static BMT_node _bmt_alloc_node(BMT_tag tag, const SPchar* name, SPsize length, 
     return node;
 }
 
-static SPsize _bmt_length_of(BMT_tag tag)
+static BMT_size _bmt_length_of(BMT_tag tag)
 {
     switch (tag)
     {
         case BMT_TAG_BYTE:
-            return sizeof(SPbyte);
+            return sizeof(BMT_byte);
         case BMT_TAG_SHORT:
-            return sizeof(SPshort);
+            return sizeof(BMT_short);
         case BMT_TAG_INT:
-            return sizeof(SPint);
+            return sizeof(BMT_int);
         case BMT_TAG_LONG:
-            return sizeof(SPlong);
+            return sizeof(BMT_long);
         case BMT_TAG_FLOAT:
-            return sizeof(SPfloat);
+            return sizeof(BMT_float);
         case BMT_TAG_DOUBLE:
-            return sizeof(SPdouble);
+            return sizeof(BMT_double);
         case BMT_TAG_NULL:
             break;
         default:
@@ -218,12 +218,12 @@ BMT_node bmt_AllocList()
     return list;
 }
 
-SPint _bmt_strcmp(const SPchar* a, const SPchar* b)
+BMT_int _bmt_strcmp(const BMT_char* a, const BMT_char* b)
 {
     // Compare the strings lexicographically.
     // Longer strings are majored, shorter strings are minored.
-    SPsize aLen = strlen(a);
-    SPsize bLen = strlen(b);
+    BMT_size aLen = strlen(a);
+    BMT_size bLen = strlen(b);
 
     if (aLen == bLen)
         return strcmp(a, b);
@@ -234,7 +234,7 @@ SPint _bmt_strcmp(const SPchar* a, const SPchar* b)
         return -1;
 }
 
-void _bmt_strncpy(SPchar** dst, const SPchar* src, SPsize length)
+void _bmt_strncpy(BMT_char** dst, const BMT_char* src, BMT_size length)
 {
     if (!src)
     {
@@ -259,11 +259,11 @@ void _bmt_strncpy(SPchar** dst, const SPchar* src, SPsize length)
 
         if (!(*dst))
         {
-            BMT_CHECKED_CALLOC(*dst, length + 1, sizeof(SPchar), return);
+            BMT_CHECKED_CALLOC(*dst, length + 1, sizeof(BMT_char), return);
         }
         else
         {
-            SPchar* ptr = realloc(*dst, length + 1);
+            BMT_char* ptr = realloc(*dst, length + 1);
             if (!ptr)
             {
                 free(*dst);
@@ -337,7 +337,7 @@ void _bmt_update(BMT_node node)
     }
 }
 
-static SPbool _bmt_copy_payload_from_node(const BMT_node src, BMT_node dst)
+static BMT_bool _bmt_copy_payload_from_node(const BMT_node src, BMT_node dst)
 {
     if (src && dst)
     {
@@ -384,8 +384,8 @@ static SPbool _bmt_copy_payload_from_node(const BMT_node src, BMT_node dst)
     return BMT_TRUE;
 }
 
-static SPbool
-_bmt_copy_payload_from_memory(BMT_node node, BMT_tag tag, SPsize length, const void* value, SPbool copyValue)
+static BMT_bool
+_bmt_copy_payload_from_memory(BMT_node node, BMT_tag tag, BMT_size length, const void* value, BMT_bool copyValue)
 {
     if (node)
     {
@@ -394,28 +394,28 @@ _bmt_copy_payload_from_memory(BMT_node node, BMT_tag tag, SPsize length, const v
             case BMT_TAG_NULL:
                 break;
             case BMT_TAG_BYTE:
-                node->payload.tag_byte = *(const SPbyte*)value;
-                node->length = sizeof(SPbyte);
+                node->payload.tag_byte = *(const BMT_byte*)value;
+                node->length = sizeof(BMT_byte);
                 break;
             case BMT_TAG_SHORT:
-                node->payload.tag_short = *(const SPshort*)value;
-                node->length = sizeof(SPshort);
+                node->payload.tag_short = *(const BMT_short*)value;
+                node->length = sizeof(BMT_short);
                 break;
             case BMT_TAG_INT:
-                node->payload.tag_int = *(const SPint*)value;
-                node->length = sizeof(SPint);
+                node->payload.tag_int = *(const BMT_int*)value;
+                node->length = sizeof(BMT_int);
                 break;
             case BMT_TAG_LONG:
-                node->payload.tag_long = *(const SPlong*)value;
-                node->length = sizeof(SPlong);
+                node->payload.tag_long = *(const BMT_long*)value;
+                node->length = sizeof(BMT_long);
                 break;
             case BMT_TAG_FLOAT:
-                node->payload.tag_float = *(const SPfloat*)value;
-                node->length = sizeof(SPfloat);
+                node->payload.tag_float = *(const BMT_float*)value;
+                node->length = sizeof(BMT_float);
                 break;
             case BMT_TAG_DOUBLE:
-                node->payload.tag_double = *(const SPdouble*)value;
-                node->length = sizeof(SPdouble);
+                node->payload.tag_double = *(const BMT_double*)value;
+                node->length = sizeof(BMT_double);
                 break;
             case BMT_TAG_STRING:
             {
@@ -426,7 +426,7 @@ _bmt_copy_payload_from_memory(BMT_node node, BMT_tag tag, SPsize length, const v
                     return BMT_FALSE;
                 }
                 node->length = length;
-                _bmt_strncpy(&node->payload.tag_string, (const SPchar*)value, length);
+                _bmt_strncpy(&node->payload.tag_string, (const BMT_char*)value, length);
                 break;
             }
 
@@ -573,12 +573,12 @@ BMT_node bmt_Copy(const BMT_node n)
     return ret;
 }
 
-SPbool _bmt_decimal_almost_equal(SPdouble a, SPdouble b, SPsize places)
+BMT_bool _bmt_decimal_almost_equal(BMT_double a, BMT_double b, BMT_size places)
 {
-    return (fabs(a - b) < pow(10.0, -(SPdouble)places));
+    return (fabs(a - b) < pow(10.0, -(BMT_double)places));
 }
 
-SPbool _bmt_is_equal(const BMT_node a, const BMT_node b)
+BMT_bool _bmt_is_equal(const BMT_node a, const BMT_node b)
 {
     if (!a && !b)
         return BMT_TRUE;
@@ -647,7 +647,7 @@ SPbool _bmt_is_equal(const BMT_node a, const BMT_node b)
     return BMT_TRUE;
 }
 
-SPbool _bmt_is_tree_equal_impl(const BMT_node a, const BMT_node b, int depth)
+BMT_bool _bmt_is_tree_equal_impl(const BMT_node a, const BMT_node b, int depth)
 {
     if (!_bmt_is_equal(a, b))
         return BMT_FALSE;
@@ -665,12 +665,12 @@ SPbool _bmt_is_tree_equal_impl(const BMT_node a, const BMT_node b, int depth)
                     : BMT_TRUE;
 }
 
-SPbool _bmt_is_tree_equal(const BMT_node a, const BMT_node b)
+BMT_bool _bmt_is_tree_equal(const BMT_node a, const BMT_node b)
 {
     return _bmt_is_tree_equal_impl(a, b, 0);
 }
 
-SPbool _bmt_is_list_equal(const BMT_node a, const BMT_node b)
+BMT_bool _bmt_is_list_equal(const BMT_node a, const BMT_node b)
 {
     BMT_node aCursor = a, bCursor = b;
     for (; aCursor && bCursor; aCursor = aCursor->major, bCursor = bCursor->major)
@@ -685,7 +685,7 @@ SPbool _bmt_is_list_equal(const BMT_node a, const BMT_node b)
     return (!aCursor && !bCursor);
 }
 
-SPbool bmt_IsEqual(const BMT_node a, const BMT_node b)
+BMT_bool bmt_IsEqual(const BMT_node a, const BMT_node b)
 {
     if (a == b)
         return BMT_TRUE;
@@ -794,11 +794,11 @@ void bmt_Delete(BMT_node* node)
     }
 }
 
-static BMT_node _bmt_search_impl(const BMT_node tree, const SPchar* name, int depth)
+static BMT_node _bmt_search_impl(const BMT_node tree, const BMT_char* name, int depth)
 {
     if (tree)
     {
-        SPint cmp = _bmt_strcmp(name, tree->name);
+        BMT_int cmp = _bmt_strcmp(name, tree->name);
         if (cmp == 0)
             return tree;
 
@@ -810,7 +810,7 @@ static BMT_node _bmt_search_impl(const BMT_node tree, const SPchar* name, int de
     return NULL;
 }
 
-BMT_node _bmt_search(const BMT_node tree, const SPchar* name)
+BMT_node _bmt_search(const BMT_node tree, const BMT_char* name)
 {
     BMT_node ret = NULL;
     if (bmt_IsTree(tree))
@@ -821,7 +821,7 @@ BMT_node _bmt_search(const BMT_node tree, const SPchar* name)
 }
 
 static BMT_node _bmt_insert_data(
-    BMT_node* head, BMT_node node, const SPchar* name, BMT_tag tag, SPsize length, const void* value, SPbool copyValue)
+    BMT_node* head, BMT_node node, const BMT_char* name, BMT_tag tag, BMT_size length, const void* value, BMT_bool copyValue)
 {
     if (!node)
     {
@@ -833,7 +833,7 @@ static BMT_node _bmt_insert_data(
         return *head;
     }
 
-    SPint cmp;
+    BMT_int cmp;
     if (node->name)
     {
         cmp = _bmt_strcmp(name, node->name);
@@ -860,7 +860,7 @@ static BMT_node _bmt_insert_data(
     }
 
     cmp = _bmt_strcmp(name, node->name);
-    SPbool maj = cmp > 0;
+    BMT_bool maj = cmp > 0;
     BMT_node primary = maj ? node->major : node->minor;
 
     if (primary)
@@ -881,7 +881,7 @@ static BMT_node _bmt_insert_data(
     return primary;
 }
 
-const SPchar* _bmt_tag_to_str(BMT_tag tag)
+const BMT_char* _bmt_tag_to_str(BMT_tag tag)
 {
     switch (tag)
     {
@@ -925,16 +925,16 @@ const SPchar* _bmt_tag_to_str(BMT_tag tag)
     return "NULL";
 }
 
-static void _bmt_bprintf(SPbuffer* b, const SPchar* restrict format, ...)
+static void _bmt_bprintf(BMT_buffer* b, const BMT_char* restrict format, ...)
 {
     va_list args;
-    SPsize size;
+    BMT_size size;
 
     va_start(args, format);
     size = vsnprintf(NULL, 0, format, args);
     va_end(args);
 
-    if (!spBufferReserve(b, b->length + size + 1))
+    if (!bmt_BufferReserve(b, b->length + size + 1))
         return;
 
     va_start(args, format);
@@ -944,13 +944,13 @@ static void _bmt_bprintf(SPbuffer* b, const SPchar* restrict format, ...)
     b->length += size;
 }
 
-static void _bmt_print(const BMT_node tree, SPbuffer* buffer, int level, SPbool printTreeData)
+static void _bmt_print(const BMT_node tree, BMT_buffer* buffer, int level, BMT_bool printTreeData)
 {
     if (tree)
     {
-        SPchar color = tree->red ? 'R' : 'B';
-        SPchar rank = _bmt_is_root(tree) ? '~' : (_bmt_is_major(tree) ? '+' : '-');
-        const SPchar* format = printTreeData ? "(%c%c) %s (%lld elements) (%lld):\n" : "%s (%lld elements):\n";
+        BMT_char color = tree->red ? 'R' : 'B';
+        BMT_char rank = _bmt_is_root(tree) ? '~' : (_bmt_is_major(tree) ? '+' : '-');
+        const BMT_char* format = printTreeData ? "(%c%c) %s (%lld elements) (%lld):\n" : "%s (%lld elements):\n";
 
         for (int i = 0; i < level; i++)
             _bmt_bprintf(buffer, "\t");
@@ -1094,7 +1094,7 @@ static void _bmt_print(const BMT_node tree, SPbuffer* buffer, int level, SPbool 
     }
 }
 
-void _bmt_print_list(const BMT_node list, SPbuffer* buffer, int level)
+void _bmt_print_list(const BMT_node list, BMT_buffer* buffer, int level)
 {
     if (list)
     {
@@ -1147,7 +1147,7 @@ void _bmt_print_list(const BMT_node list, SPbuffer* buffer, int level)
     }
 }
 
-void _bmt_print_tree_depth(const BMT_node tree, SPbuffer* buffer, int level, int depth)
+void _bmt_print_tree_depth(const BMT_node tree, BMT_buffer* buffer, int level, int depth)
 {
     if (tree)
     {
@@ -1157,14 +1157,14 @@ void _bmt_print_tree_depth(const BMT_node tree, SPbuffer* buffer, int level, int
     }
 }
 
-void _bmt_print_tree(const BMT_node tree, SPbuffer* buffer, int level)
+void _bmt_print_tree(const BMT_node tree, BMT_buffer* buffer, int level)
 {
     _bmt_print_tree_depth(tree, buffer, level, 0);
 }
 
-SPbuffer bmt_ToString(const BMT_node node)
+BMT_buffer bmt_ToString(const BMT_node node)
 {
-    SPbuffer buffer = BMT_BUFFER_INIT;
+    BMT_buffer buffer = BMT_BUFFER_INIT;
     if (node)
     {
         if (!(bmt_IsTree(node) || bmt_IsList(node)))
@@ -1196,49 +1196,49 @@ void bmt_Print(const BMT_node node)
 {
     if (node)
     {
-        SPbuffer buf = bmt_ToString(node);
-        printf("%s", (const SPchar*)buf.data);
-        spBufferFree(&buf);
+        BMT_buffer buf = bmt_ToString(node);
+        printf("%s", (const BMT_char*)buf.data);
+        bmt_BufferFree(&buf);
     }
 }
 
-void bmt_InsertByte(BMT_node* tree, const SPchar* name, SPbyte value)
+void bmt_InsertByte(BMT_node* tree, const BMT_char* name, BMT_byte value)
 {
     BMT_CHECK_INPUT(name);
-    _bmt_insert_data(tree, *tree, name, BMT_TAG_BYTE, sizeof(SPbyte), &value, BMT_TRUE);
+    _bmt_insert_data(tree, *tree, name, BMT_TAG_BYTE, sizeof(BMT_byte), &value, BMT_TRUE);
 }
 
-void bmt_InsertShort(BMT_node* tree, const SPchar* name, SPshort value)
+void bmt_InsertShort(BMT_node* tree, const BMT_char* name, BMT_short value)
 {
     BMT_CHECK_INPUT(name);
-    _bmt_insert_data(tree, *tree, name, BMT_TAG_SHORT, sizeof(SPshort), &value, BMT_TRUE);
+    _bmt_insert_data(tree, *tree, name, BMT_TAG_SHORT, sizeof(BMT_short), &value, BMT_TRUE);
 }
 
-void bmt_InsertInt(BMT_node* tree, const SPchar* name, SPint value)
+void bmt_InsertInt(BMT_node* tree, const BMT_char* name, BMT_int value)
 {
     BMT_CHECK_INPUT(name);
-    _bmt_insert_data(tree, *tree, name, BMT_TAG_INT, sizeof(SPint), &value, BMT_TRUE);
+    _bmt_insert_data(tree, *tree, name, BMT_TAG_INT, sizeof(BMT_int), &value, BMT_TRUE);
 }
 
-void bmt_InsertLong(BMT_node* tree, const SPchar* name, SPlong value)
+void bmt_InsertLong(BMT_node* tree, const BMT_char* name, BMT_long value)
 {
     BMT_CHECK_INPUT(name);
-    _bmt_insert_data(tree, *tree, name, BMT_TAG_LONG, sizeof(SPlong), &value, BMT_TRUE);
+    _bmt_insert_data(tree, *tree, name, BMT_TAG_LONG, sizeof(BMT_long), &value, BMT_TRUE);
 }
 
-void bmt_InsertFloat(BMT_node* tree, const SPchar* name, SPfloat value)
+void bmt_InsertFloat(BMT_node* tree, const BMT_char* name, BMT_float value)
 {
     BMT_CHECK_INPUT(name);
-    _bmt_insert_data(tree, *tree, name, BMT_TAG_FLOAT, sizeof(SPfloat), &value, BMT_TRUE);
+    _bmt_insert_data(tree, *tree, name, BMT_TAG_FLOAT, sizeof(BMT_float), &value, BMT_TRUE);
 }
 
-void bmt_InsertDouble(BMT_node* tree, const SPchar* name, SPdouble value)
+void bmt_InsertDouble(BMT_node* tree, const BMT_char* name, BMT_double value)
 {
     BMT_CHECK_INPUT(name);
-    _bmt_insert_data(tree, *tree, name, BMT_TAG_DOUBLE, sizeof(SPdouble), &value, BMT_TRUE);
+    _bmt_insert_data(tree, *tree, name, BMT_TAG_DOUBLE, sizeof(BMT_double), &value, BMT_TRUE);
 }
 
-void bmt_InsertString(BMT_node* tree, const SPchar* name, const SPchar* value)
+void bmt_InsertString(BMT_node* tree, const BMT_char* name, const BMT_char* value)
 {
     if (!value)
     {
@@ -1247,7 +1247,7 @@ void bmt_InsertString(BMT_node* tree, const SPchar* name, const SPchar* value)
     }
 
     BMT_CHECK_INPUT(name);
-    SPsize valueLength = strlen(value);
+    BMT_size valueLength = strlen(value);
     // Prevent excessive string allocation
     if (valueLength >= BMT_MAX_STRING_LENGTH)
     {
@@ -1257,7 +1257,7 @@ void bmt_InsertString(BMT_node* tree, const SPchar* name, const SPchar* value)
     _bmt_insert_data(tree, *tree, name, BMT_TAG_STRING, valueLength, value, BMT_TRUE);
 }
 
-static void _bmt_insert_list(BMT_node* tree, const SPchar* name, BMT_tag tag, SPsize length, const void* values)
+static void _bmt_insert_list(BMT_node* tree, const BMT_char* name, BMT_tag tag, BMT_size length, const void* values)
 {
     BMT_CHECK_INPUT(name);
     if (!values || length <= 0)
@@ -1277,54 +1277,54 @@ static void _bmt_insert_list(BMT_node* tree, const SPchar* name, BMT_tag tag, SP
     _bmt_insert_data(tree, *tree, name, tag, _bmt_length_of_list(list), list, BMT_FALSE);
 }
 
-void bmt_InsertByteList(BMT_node* tree, const SPchar* name, SPsize length, const SPbyte* values)
+void bmt_InsertByteList(BMT_node* tree, const BMT_char* name, BMT_size length, const BMT_byte* values)
 {
     _bmt_insert_list(tree, name, BMT_TAG_BYTE_LIST, length, values);
 }
 
-void bmt_InsertShortList(BMT_node* tree, const SPchar* name, SPsize length, const SPshort* values)
+void bmt_InsertShortList(BMT_node* tree, const BMT_char* name, BMT_size length, const BMT_short* values)
 {
     _bmt_insert_list(tree, name, BMT_TAG_SHORT_LIST, length, values);
 }
 
-void bmt_InsertIntList(BMT_node* tree, const SPchar* name, SPsize length, const SPint* values)
+void bmt_InsertIntList(BMT_node* tree, const BMT_char* name, BMT_size length, const BMT_int* values)
 {
     _bmt_insert_list(tree, name, BMT_TAG_INT_LIST, length, values);
 }
 
-void bmt_InsertLongList(BMT_node* tree, const SPchar* name, SPsize length, const SPlong* values)
+void bmt_InsertLongList(BMT_node* tree, const BMT_char* name, BMT_size length, const BMT_long* values)
 {
     _bmt_insert_list(tree, name, BMT_TAG_LONG_LIST, length, values);
 }
 
-void bmt_InsertFloatList(BMT_node* tree, const SPchar* name, SPsize length, const SPfloat* values)
+void bmt_InsertFloatList(BMT_node* tree, const BMT_char* name, BMT_size length, const BMT_float* values)
 {
     _bmt_insert_list(tree, name, BMT_TAG_FLOAT_LIST, length, values);
 }
 
-void bmt_InsertDoubleList(BMT_node* tree, const SPchar* name, SPsize length, const SPdouble* values)
+void bmt_InsertDoubleList(BMT_node* tree, const BMT_char* name, BMT_size length, const BMT_double* values)
 {
     _bmt_insert_list(tree, name, BMT_TAG_DOUBLE_LIST, length, values);
 }
 
-void bmt_InsertStringList(BMT_node* tree, const SPchar* name, SPsize length, const SPchar** values)
+void bmt_InsertStringList(BMT_node* tree, const BMT_char* name, BMT_size length, const BMT_char** values)
 {
     _bmt_insert_list(tree, name, BMT_TAG_STRING_LIST, length, values);
 }
 
-void bmt_CreateTree(BMT_node* tree, const SPchar* name)
+void bmt_CreateTree(BMT_node* tree, const BMT_char* name)
 {
     BMT_CHECK_INPUT(name);
     _bmt_insert_data(tree, *tree, name, BMT_TAG_ROOT, 0, NULL, BMT_FALSE);
 }
 
-void bmt_CreateList(BMT_node* tree, const SPchar* name)
+void bmt_CreateList(BMT_node* tree, const BMT_char* name)
 {
     BMT_CHECK_INPUT(name);
     _bmt_insert_data(tree, *tree, name, BMT_TAG_LIST, 0, NULL, BMT_FALSE);
 }
 
-void bmt_Insert(BMT_node* tree, const SPchar* name, const BMT_node value)
+void bmt_Insert(BMT_node* tree, const BMT_char* name, const BMT_node value)
 {
     BMT_CHECK_INPUT(name);
     BMT_tag tag = _bmt_get_object_tag(value);
@@ -1338,9 +1338,9 @@ void bmt_Insert(BMT_node* tree, const SPchar* name, const BMT_node value)
     _bmt_insert_data(tree, *tree, name, tag, bmt_IsList(value) ? _bmt_length_of_list(value) : 0, value, BMT_TRUE);
 }
 
-SPsize _bmt_length_of_list(const BMT_node list)
+BMT_size _bmt_length_of_list(const BMT_node list)
 {
-    SPsize length = 0;
+    BMT_size length = 0;
     if (bmt_IsList(list))
     {
         BMT_node cursor = NULL;
@@ -1350,7 +1350,7 @@ SPsize _bmt_length_of_list(const BMT_node list)
     return length;
 }
 
-SPlong bmt_GetNumber(const BMT_node tree, const SPchar* name)
+BMT_long bmt_GetNumber(const BMT_node tree, const BMT_char* name)
 {
     BMT_node n = _bmt_search(tree, name);
     if (n)
@@ -1372,7 +1372,7 @@ SPlong bmt_GetNumber(const BMT_node tree, const SPchar* name)
     return 0LL;
 }
 
-SPdouble bmt_GetDecimal(const BMT_node tree, const SPchar* name)
+BMT_double bmt_GetDecimal(const BMT_node tree, const BMT_char* name)
 {
     BMT_node n = _bmt_search(tree, name);
     if (n)
@@ -1390,54 +1390,54 @@ SPdouble bmt_GetDecimal(const BMT_node tree, const SPchar* name)
     return 0.0;
 }
 
-SPbyte bmt_GetByte(const BMT_node tree, const SPchar* name)
+BMT_byte bmt_GetByte(const BMT_node tree, const BMT_char* name)
 {
     BMT_node n = _bmt_search(tree, name);
     return (n && n->tag == BMT_TAG_BYTE) ? n->payload.tag_byte : 0;
 }
 
-SPshort bmt_GetShort(const BMT_node tree, const SPchar* name)
+BMT_short bmt_GetShort(const BMT_node tree, const BMT_char* name)
 {
     BMT_node n = _bmt_search(tree, name);
     return (n && n->tag == BMT_TAG_SHORT) ? n->payload.tag_short : 0;
 }
 
-SPint bmt_GetInt(const BMT_node tree, const SPchar* name)
+BMT_int bmt_GetInt(const BMT_node tree, const BMT_char* name)
 {
     BMT_node n = _bmt_search(tree, name);
     return (n && n->tag == BMT_TAG_INT) ? n->payload.tag_int : 0;
 }
 
-SPlong bmt_GetLong(const BMT_node tree, const SPchar* name)
+BMT_long bmt_GetLong(const BMT_node tree, const BMT_char* name)
 {
     BMT_node n = _bmt_search(tree, name);
     return (n && n->tag == BMT_TAG_LONG) ? n->payload.tag_long : 0LL;
 }
 
-SPfloat bmt_GetFloat(const BMT_node tree, const SPchar* name)
+BMT_float bmt_GetFloat(const BMT_node tree, const BMT_char* name)
 {
     BMT_node n = _bmt_search(tree, name);
     return (n && n->tag == BMT_TAG_FLOAT) ? n->payload.tag_float : 0.f;
 }
 
-SPdouble bmt_GetDouble(const BMT_node tree, const SPchar* name)
+BMT_double bmt_GetDouble(const BMT_node tree, const BMT_char* name)
 {
     BMT_node n = _bmt_search(tree, name);
     return (n && n->tag == BMT_TAG_DOUBLE) ? n->payload.tag_double : 0.0;
 }
 
-const SPchar* bmt_GetString(const BMT_node tree, const SPchar* name)
+const BMT_char* bmt_GetString(const BMT_node tree, const BMT_char* name)
 {
     BMT_node n = _bmt_search(tree, name);
     return (n && n->tag == BMT_TAG_STRING) ? n->payload.tag_string : NULL;
 }
 
-BMT_node bmt_Get(const BMT_node tree, const SPchar* name)
+BMT_node bmt_Get(const BMT_node tree, const BMT_char* name)
 {
     return _bmt_search(tree, name);
 }
 
-static void _bmt_set_value(BMT_node tree, BMT_tag tag, const SPchar* name, const void* value)
+static void _bmt_set_value(BMT_node tree, BMT_tag tag, const BMT_char* name, const void* value)
 {
     BMT_node n = _bmt_search(tree, name);
     if (n && n->tag == tag)
@@ -1445,36 +1445,36 @@ static void _bmt_set_value(BMT_node tree, BMT_tag tag, const SPchar* name, const
         switch (tag)
         {
             case BMT_TAG_BYTE:
-                n->payload.tag_byte = *((const SPbyte*)value);
+                n->payload.tag_byte = *((const BMT_byte*)value);
                 break;
             case BMT_TAG_SHORT:
-                n->payload.tag_short = *((const SPshort*)value);
+                n->payload.tag_short = *((const BMT_short*)value);
                 break;
             case BMT_TAG_INT:
-                n->payload.tag_int = *((const SPint*)value);
+                n->payload.tag_int = *((const BMT_int*)value);
                 break;
             case BMT_TAG_LONG:
-                n->payload.tag_long = *((const SPlong*)value);
+                n->payload.tag_long = *((const BMT_long*)value);
                 break;
             case BMT_TAG_FLOAT:
-                n->payload.tag_float = *((const SPfloat*)value);
+                n->payload.tag_float = *((const BMT_float*)value);
                 break;
             case BMT_TAG_DOUBLE:
-                n->payload.tag_double = *((const SPdouble*)value);
+                n->payload.tag_double = *((const BMT_double*)value);
                 break;
             case BMT_TAG_STRING:
             {
-                const SPchar* newValue = (const SPchar*)value;
+                const BMT_char* newValue = (const BMT_char*)value;
                 if (newValue)
                 {
-                    SPsize length = strlen(newValue) + 1;
+                    BMT_size length = strlen(newValue) + 1;
                     // Bounds check
                     if (length - 1 >= BMT_MAX_STRING_LENGTH)
                     {
                         bmt_error_flag = BMT_STATUS_BAD_VALUE;
                         return;
                     }
-                    SPchar* newStr = realloc(n->payload.tag_string, length);
+                    BMT_char* newStr = realloc(n->payload.tag_string, length);
                     if (!newStr)
                     {
                         // Don't free old pointer - leave node in valid state
@@ -1494,42 +1494,42 @@ static void _bmt_set_value(BMT_node tree, BMT_tag tag, const SPchar* name, const
     }
 }
 
-void bmt_SetByte(BMT_node tree, const SPchar* name, SPbyte value)
+void bmt_SetByte(BMT_node tree, const BMT_char* name, BMT_byte value)
 {
     _bmt_set_value(tree, BMT_TAG_BYTE, name, &value);
 }
 
-void bmt_SetShort(BMT_node tree, const SPchar* name, SPshort value)
+void bmt_SetShort(BMT_node tree, const BMT_char* name, BMT_short value)
 {
     _bmt_set_value(tree, BMT_TAG_SHORT, name, &value);
 }
 
-void bmt_SetInt(BMT_node tree, const SPchar* name, SPint value)
+void bmt_SetInt(BMT_node tree, const BMT_char* name, BMT_int value)
 {
     _bmt_set_value(tree, BMT_TAG_INT, name, &value);
 }
 
-void bmt_SetLong(BMT_node tree, const SPchar* name, SPlong value)
+void bmt_SetLong(BMT_node tree, const BMT_char* name, BMT_long value)
 {
     _bmt_set_value(tree, BMT_TAG_LONG, name, &value);
 }
 
-void bmt_SetFloat(BMT_node tree, const SPchar* name, SPfloat value)
+void bmt_SetFloat(BMT_node tree, const BMT_char* name, BMT_float value)
 {
     _bmt_set_value(tree, BMT_TAG_FLOAT, name, &value);
 }
 
-void bmt_SetDouble(BMT_node tree, const SPchar* name, SPdouble value)
+void bmt_SetDouble(BMT_node tree, const BMT_char* name, BMT_double value)
 {
     _bmt_set_value(tree, BMT_TAG_DOUBLE, name, &value);
 }
 
-void bmt_SetString(BMT_node tree, const SPchar* name, const SPchar* value)
+void bmt_SetString(BMT_node tree, const BMT_char* name, const BMT_char* value)
 {
     _bmt_set_value(tree, BMT_TAG_STRING, name, value);
 }
 
-BMT_node bmt_ToList(BMT_tag tag, SPsize length, const void* data)
+BMT_node bmt_ToList(BMT_tag tag, BMT_size length, const void* data)
 {
     if (!data)
     {
@@ -1544,32 +1544,32 @@ BMT_node bmt_ToList(BMT_tag tag, SPsize length, const void* data)
     }
 
     BMT_node list = NULL;
-    for (SPsize i = 0; i < length; i++)
+    for (BMT_size i = 0; i < length; i++)
     {
         switch (tag & ~BMT_TAG_LIST)
         {
             case BMT_TAG_BYTE:
-                bmt_AppendByte(&list, *(((const SPbyte*)data) + i));
+                bmt_AppendByte(&list, *(((const BMT_byte*)data) + i));
                 break;
             case BMT_TAG_SHORT:
-                bmt_AppendShort(&list, *(((const SPshort*)data) + i));
+                bmt_AppendShort(&list, *(((const BMT_short*)data) + i));
                 break;
             case BMT_TAG_INT:
-                bmt_AppendInt(&list, *(((const SPint*)data) + i));
+                bmt_AppendInt(&list, *(((const BMT_int*)data) + i));
                 break;
             case BMT_TAG_LONG:
-                bmt_AppendLong(&list, *(((const SPlong*)data) + i));
+                bmt_AppendLong(&list, *(((const BMT_long*)data) + i));
                 break;
             case BMT_TAG_FLOAT:
-                bmt_AppendFloat(&list, *(((const SPfloat*)data) + i));
+                bmt_AppendFloat(&list, *(((const BMT_float*)data) + i));
                 break;
             case BMT_TAG_DOUBLE:
-                bmt_AppendDouble(&list, *(((const SPdouble*)data) + i));
+                bmt_AppendDouble(&list, *(((const BMT_double*)data) + i));
                 break;
             case BMT_TAG_STRING:
             {
-                if (*(((const SPchar**)data) + i))
-                    bmt_AppendString(&list, *(((const SPchar**)data) + i));
+                if (*(((const BMT_char**)data) + i))
+                    bmt_AppendString(&list, *(((const BMT_char**)data) + i));
                 break;
             }
         }
@@ -1585,12 +1585,12 @@ BMT_node bmt_ToList(BMT_tag tag, SPsize length, const void* data)
     return list;
 }
 
-SPsize bmt_Length(const BMT_node node)
+BMT_size bmt_Length(const BMT_node node)
 {
     return _bmt_length_of_list(node);
 }
 
-void bmt_RemoveAt(BMT_node* list, SPindex pos)
+void bmt_RemoveAt(BMT_node* list, BMT_index pos)
 {
     if (!list)
     {
@@ -1611,7 +1611,7 @@ void bmt_RemoveAt(BMT_node* list, SPindex pos)
     }
 
     BMT_node cursor = *list;
-    for (SPsize i = 1; i <= pos; i++)
+    for (BMT_size i = 1; i <= pos; i++)
     {
         if (!cursor)
         {
@@ -1638,7 +1638,7 @@ void bmt_RemoveAt(BMT_node* list, SPindex pos)
     }
 }
 
-void _bmt_insert_multi_list(BMT_node* _list, BMT_tag tag, SPsize length, const void* values, SPbool copyValue)
+void _bmt_insert_multi_list(BMT_node* _list, BMT_tag tag, BMT_size length, const void* values, BMT_bool copyValue)
 {
     if (!_list)
     {
@@ -1702,37 +1702,37 @@ void _bmt_insert_multi_list(BMT_node* _list, BMT_tag tag, SPsize length, const v
     }
 }
 
-void bmt_AppendByte(BMT_node* list, SPbyte value)
+void bmt_AppendByte(BMT_node* list, BMT_byte value)
 {
-    _bmt_insert_multi_list(list, BMT_TAG_BYTE, sizeof(SPbyte), &value, BMT_TRUE);
+    _bmt_insert_multi_list(list, BMT_TAG_BYTE, sizeof(BMT_byte), &value, BMT_TRUE);
 }
 
-void bmt_AppendShort(BMT_node* list, SPshort value)
+void bmt_AppendShort(BMT_node* list, BMT_short value)
 {
-    _bmt_insert_multi_list(list, BMT_TAG_SHORT, sizeof(SPshort), &value, BMT_TRUE);
+    _bmt_insert_multi_list(list, BMT_TAG_SHORT, sizeof(BMT_short), &value, BMT_TRUE);
 }
 
-void bmt_AppendInt(BMT_node* list, SPint value)
+void bmt_AppendInt(BMT_node* list, BMT_int value)
 {
-    _bmt_insert_multi_list(list, BMT_TAG_INT, sizeof(SPint), &value, BMT_TRUE);
+    _bmt_insert_multi_list(list, BMT_TAG_INT, sizeof(BMT_int), &value, BMT_TRUE);
 }
 
-void bmt_AppendLong(BMT_node* list, SPlong value)
+void bmt_AppendLong(BMT_node* list, BMT_long value)
 {
-    _bmt_insert_multi_list(list, BMT_TAG_LONG, sizeof(SPlong), &value, BMT_TRUE);
+    _bmt_insert_multi_list(list, BMT_TAG_LONG, sizeof(BMT_long), &value, BMT_TRUE);
 }
 
-void bmt_AppendFloat(BMT_node* list, SPfloat value)
+void bmt_AppendFloat(BMT_node* list, BMT_float value)
 {
-    _bmt_insert_multi_list(list, BMT_TAG_FLOAT, sizeof(SPfloat), &value, BMT_TRUE);
+    _bmt_insert_multi_list(list, BMT_TAG_FLOAT, sizeof(BMT_float), &value, BMT_TRUE);
 }
 
-void bmt_AppendDouble(BMT_node* list, SPdouble value)
+void bmt_AppendDouble(BMT_node* list, BMT_double value)
 {
-    _bmt_insert_multi_list(list, BMT_TAG_DOUBLE, sizeof(SPdouble), &value, BMT_TRUE);
+    _bmt_insert_multi_list(list, BMT_TAG_DOUBLE, sizeof(BMT_double), &value, BMT_TRUE);
 }
 
-void bmt_AppendString(BMT_node* list, const SPchar* value)
+void bmt_AppendString(BMT_node* list, const BMT_char* value)
 {
     if (!value)
     {
@@ -1742,7 +1742,7 @@ void bmt_AppendString(BMT_node* list, const SPchar* value)
     _bmt_insert_multi_list(list, BMT_TAG_STRING, strlen(value), value, BMT_TRUE);
 }
 
-void bmt_AppendByteList(BMT_node* list, SPsize length, const SPbyte* values)
+void bmt_AppendByteList(BMT_node* list, BMT_size length, const BMT_byte* values)
 {
     BMT_node v = bmt_ToList(BMT_TAG_BYTE, length, values);
     if (!v)
@@ -1754,7 +1754,7 @@ void bmt_AppendByteList(BMT_node* list, SPsize length, const SPbyte* values)
     _bmt_insert_multi_list(list, BMT_TAG_BYTE_LIST, length, v, BMT_FALSE);
 }
 
-void bmt_AppendShortList(BMT_node* list, SPsize length, const SPshort* values)
+void bmt_AppendShortList(BMT_node* list, BMT_size length, const BMT_short* values)
 {
     BMT_node v = bmt_ToList(BMT_TAG_SHORT, length, values);
     if (!v)
@@ -1766,7 +1766,7 @@ void bmt_AppendShortList(BMT_node* list, SPsize length, const SPshort* values)
     _bmt_insert_multi_list(list, BMT_TAG_SHORT_LIST, length, v, BMT_FALSE);
 }
 
-void bmt_AppendIntList(BMT_node* list, SPsize length, const SPint* values)
+void bmt_AppendIntList(BMT_node* list, BMT_size length, const BMT_int* values)
 {
     BMT_node v = bmt_ToList(BMT_TAG_INT, length, values);
     if (!v)
@@ -1778,7 +1778,7 @@ void bmt_AppendIntList(BMT_node* list, SPsize length, const SPint* values)
     _bmt_insert_multi_list(list, BMT_TAG_INT_LIST, length, v, BMT_FALSE);
 }
 
-void bmt_AppendLongList(BMT_node* list, SPsize length, const SPlong* values)
+void bmt_AppendLongList(BMT_node* list, BMT_size length, const BMT_long* values)
 {
     BMT_node v = bmt_ToList(BMT_TAG_LONG, length, values);
     if (!v)
@@ -1790,7 +1790,7 @@ void bmt_AppendLongList(BMT_node* list, SPsize length, const SPlong* values)
     _bmt_insert_multi_list(list, BMT_TAG_LONG_LIST, length, v, BMT_FALSE);
 }
 
-void bmt_AppendFloatList(BMT_node* list, SPsize length, const SPfloat* values)
+void bmt_AppendFloatList(BMT_node* list, BMT_size length, const BMT_float* values)
 {
     BMT_node v = bmt_ToList(BMT_TAG_FLOAT, length, values);
     if (!v)
@@ -1802,7 +1802,7 @@ void bmt_AppendFloatList(BMT_node* list, SPsize length, const SPfloat* values)
     _bmt_insert_multi_list(list, BMT_TAG_FLOAT_LIST, length, v, BMT_FALSE);
 }
 
-void bmt_AppendDoubleList(BMT_node* list, SPsize length, const SPdouble* values)
+void bmt_AppendDoubleList(BMT_node* list, BMT_size length, const BMT_double* values)
 {
     BMT_node v = bmt_ToList(BMT_TAG_DOUBLE, length, values);
     if (!v)
@@ -1814,7 +1814,7 @@ void bmt_AppendDoubleList(BMT_node* list, SPsize length, const SPdouble* values)
     _bmt_insert_multi_list(list, BMT_TAG_DOUBLE_LIST, length, v, BMT_FALSE);
 }
 
-void bmt_AppendStringList(BMT_node* list, SPsize length, const SPchar** values)
+void bmt_AppendStringList(BMT_node* list, BMT_size length, const BMT_char** values)
 {
     BMT_node v = bmt_ToList(BMT_TAG_STRING, length, values);
     if (!v)
@@ -1837,7 +1837,7 @@ void bmt_Append(BMT_node* list, const BMT_node value)
     _bmt_insert_multi_list(list, tag, bmt_IsTree(value) ? 0 : _bmt_length_of_list(value), value, BMT_TRUE);
 }
 
-SPbool bmt_Remove(BMT_node* tree, const SPchar* name)
+BMT_bool bmt_Remove(BMT_node* tree, const BMT_char* name)
 {
     if (!tree)
     {
@@ -1854,7 +1854,7 @@ SPbool bmt_Remove(BMT_node* tree, const SPchar* name)
     BMT_node n = _bmt_search(*tree, name);
     if (n)
     {
-        SPbool red = n->red;
+        BMT_bool red = n->red;
         BMT_node r = NULL;
         BMT_node x = NULL;
         BMT_node w = NULL;
@@ -1872,7 +1872,7 @@ BMT_status bmt_GetLastError()
     return status;
 }
 
-const SPchar* bmt_GetErrorInfo(BMT_status status)
+const BMT_char* bmt_GetErrorInfo(BMT_status status)
 {
     switch (status)
     {

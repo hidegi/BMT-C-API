@@ -20,17 +20,17 @@
  * 3. This notice may not be removed or altered from any source
  * distribution.
  ****************************************************************************/
-#include "RB/io/internal.h"
+#include "internal.h"
 #define BMT_MAX(a, b) ((a) > (b) ? (a) : (b))
 
 static BMT_node _bmt_rotate_left(BMT_node n, BMT_node* head);
 static BMT_node _bmt_rotate_right(BMT_node n, BMT_node* head);
-static SPbool _bmt_transplant_rbt(BMT_node x, BMT_node w, BMT_node* head);
-static SPbool _bmt_transplant_proc_0(BMT_node x);
-static SPbool _bmt_transplant_proc_1(BMT_node x, BMT_node w, BMT_node* head);
-static SPbool _bmt_transplant_proc_2(BMT_node x, BMT_node w, BMT_node* head);
-static SPbool _bmt_transplant_proc_3(BMT_node x, BMT_node w, BMT_node* head);
-static SPbool _bmt_transplant_proc_4(BMT_node x, BMT_node w, BMT_node* head);
+static BMT_bool _bmt_transplant_rbt(BMT_node x, BMT_node w, BMT_node* head);
+static BMT_bool _bmt_transplant_proc_0(BMT_node x);
+static BMT_bool _bmt_transplant_proc_1(BMT_node x, BMT_node w, BMT_node* head);
+static BMT_bool _bmt_transplant_proc_2(BMT_node x, BMT_node w, BMT_node* head);
+static BMT_bool _bmt_transplant_proc_3(BMT_node x, BMT_node w, BMT_node* head);
+static BMT_bool _bmt_transplant_proc_4(BMT_node x, BMT_node w, BMT_node* head);
 
 static BMT_node _bmt_find_max(BMT_node n)
 {
@@ -42,12 +42,12 @@ static BMT_node _bmt_find_min(BMT_node n)
     return n ? (!n->minor ? n : _bmt_find_min(n->minor)) : NULL;
 }
 
-SPbool _bmt_is_major(const BMT_node node)
+BMT_bool _bmt_is_major(const BMT_node node)
 {
     return (node && node->parent) ? (node->parent->major == node) : BMT_FALSE;
 }
 
-SPbool _bmt_is_root(const BMT_node node)
+BMT_bool _bmt_is_root(const BMT_node node)
 {
     return (node && !node->parent);
 }
@@ -59,22 +59,22 @@ static BMT_node _bmt_find_member(const BMT_node node)
     return _bmt_is_major(node->parent) ? node->parent->parent->minor : node->parent->parent->major;
 }
 
-static SPsize _bmt_calculate_black_depth(const BMT_node rbt)
+static BMT_size _bmt_calculate_black_depth(const BMT_node rbt)
 {
     if (!rbt)
         return 1;
 
-    SPsize count = 0;
+    BMT_size count = 0;
 
     if (!rbt->red)
         count++;
 
-    SPsize majorDepth = _bmt_calculate_black_depth(rbt->major);
-    SPsize minorDepth = _bmt_calculate_black_depth(rbt->minor);
+    BMT_size majorDepth = _bmt_calculate_black_depth(rbt->major);
+    BMT_size minorDepth = _bmt_calculate_black_depth(rbt->minor);
     return count + BMT_MAX(minorDepth, majorDepth);
 }
 
-static SPbool _bmt_verify_rbt_impl(const BMT_node rbt, SPsize depth, SPsize ref)
+static BMT_bool _bmt_verify_rbt_impl(const BMT_node rbt, BMT_size depth, BMT_size ref)
 {
     if (rbt)
     {
@@ -105,12 +105,12 @@ static SPbool _bmt_verify_rbt_impl(const BMT_node rbt, SPsize depth, SPsize ref)
     return ref == depth;
 }
 
-SPbool bmt_IsValidRBT(const BMT_node rbt)
+BMT_bool bmt_IsValidRBT(const BMT_node rbt)
 {
     if (!bmt_IsTree(rbt))
         return BMT_FALSE;
 
-    SPsize depth = _bmt_calculate_black_depth(rbt) - 1;
+    BMT_size depth = _bmt_calculate_black_depth(rbt) - 1;
     return _bmt_verify_rbt_impl(rbt, 0, depth);
 }
 
@@ -125,7 +125,7 @@ void _bmt_fix_rbt_violations(BMT_node node, BMT_node* head)
             BMT_node g = p->parent;
             BMT_node r = NULL;
 
-            SPbool isRed = m != NULL ? m->red : BMT_FALSE;
+            BMT_bool isRed = m != NULL ? m->red : BMT_FALSE;
 
             if (isRed)
             {
@@ -153,8 +153,8 @@ void _bmt_fix_rbt_violations(BMT_node node, BMT_node* head)
                  *	for skews, rotate once
                  *	for triangles, rotate twice
                  */
-                SPbool pMajor = _bmt_is_major(p);
-                SPbool nMajor = _bmt_is_major(node);
+                BMT_bool pMajor = _bmt_is_major(p);
+                BMT_bool nMajor = _bmt_is_major(node);
 
                 if (!pMajor && !nMajor)
                 {
@@ -194,7 +194,7 @@ void _bmt_fix_rbt_violations(BMT_node node, BMT_node* head)
 
 static BMT_node _bmt_rotate_left(BMT_node n, BMT_node* head)
 {
-    SPbool maj = _bmt_is_major(n);
+    BMT_bool maj = _bmt_is_major(n);
     BMT_node p = n->parent;
     BMT_node m = n->major;
     BMT_node c = m ? n->major->minor : NULL;
@@ -216,7 +216,7 @@ static BMT_node _bmt_rotate_left(BMT_node n, BMT_node* head)
 
 static BMT_node _bmt_rotate_right(BMT_node n, BMT_node* head)
 {
-    SPbool maj = _bmt_is_major(n);
+    BMT_bool maj = _bmt_is_major(n);
     BMT_node p = n->parent;
     BMT_node m = n->minor;
     BMT_node c = m ? n->minor->major : NULL;
@@ -245,8 +245,8 @@ void _bmt_bst_delete_impl(BMT_node n, BMT_node* _r, BMT_node* _x, BMT_node* _w, 
         BMT_node r = NULL;
         BMT_node p = n->parent;
 
-        SPbool maj = _bmt_is_major(n);
-        SPbool root = _bmt_is_root(n);
+        BMT_bool maj = _bmt_is_major(n);
+        BMT_bool root = _bmt_is_root(n);
 
         if (!n->major && !n->minor)
         {
@@ -348,9 +348,9 @@ void _bmt_bst_delete_impl(BMT_node n, BMT_node* _r, BMT_node* _x, BMT_node* _w, 
     }
 }
 
-SPbool _bmt_fix_up_rbt(SPbool redBefore, BMT_node r, BMT_node x, BMT_node w, BMT_node* head)
+BMT_bool _bmt_fix_up_rbt(BMT_bool redBefore, BMT_node r, BMT_node x, BMT_node w, BMT_node* head)
 {
-    SPbool redAfter = r ? r->red : BMT_FALSE;
+    BMT_bool redAfter = r ? r->red : BMT_FALSE;
     if (redBefore && redAfter)
         return BMT_TRUE;
 
@@ -373,9 +373,9 @@ SPbool _bmt_fix_up_rbt(SPbool redBefore, BMT_node r, BMT_node x, BMT_node w, BMT
     return _bmt_transplant_rbt(x, w, head);
 }
 
-static SPbool _bmt_transplant_rbt(BMT_node x, BMT_node w, BMT_node* head)
+static BMT_bool _bmt_transplant_rbt(BMT_node x, BMT_node w, BMT_node* head)
 {
-    SPbool xRed = x ? x->red : BMT_FALSE;
+    BMT_bool xRed = x ? x->red : BMT_FALSE;
     if (xRed)
     {
         return _bmt_transplant_proc_0(x);
@@ -389,7 +389,7 @@ static SPbool _bmt_transplant_rbt(BMT_node x, BMT_node w, BMT_node* head)
             return BMT_TRUE;
         }
 
-        SPbool maj = !_bmt_is_major(w);
+        BMT_bool maj = !_bmt_is_major(w);
         if (w->red)
         {
             // x is black and w is red
@@ -397,15 +397,15 @@ static SPbool _bmt_transplant_rbt(BMT_node x, BMT_node w, BMT_node* head)
         }
         else
         {
-            SPbool wMjB = w->major ? !w->major->red : BMT_TRUE;
-            SPbool wMnB = w->minor ? !w->minor->red : BMT_TRUE;
+            BMT_bool wMjB = w->major ? !w->major->red : BMT_TRUE;
+            BMT_bool wMnB = w->minor ? !w->minor->red : BMT_TRUE;
 
             if (wMjB && wMnB)
             {
                 return _bmt_transplant_proc_2(x, w, head);
             }
 
-            SPbool c = maj ? (!wMjB && wMnB) : (!wMnB && wMjB);
+            BMT_bool c = maj ? (!wMjB && wMnB) : (!wMnB && wMjB);
             if (c)
             {
                 return _bmt_transplant_proc_3(x, w, head);
@@ -422,7 +422,7 @@ static SPbool _bmt_transplant_rbt(BMT_node x, BMT_node w, BMT_node* head)
     return BMT_FALSE;
 }
 
-static SPbool _bmt_transplant_proc_0(BMT_node x)
+static BMT_bool _bmt_transplant_proc_0(BMT_node x)
 {
     if (x->red)
     {
@@ -433,12 +433,12 @@ static SPbool _bmt_transplant_proc_0(BMT_node x)
     return BMT_FALSE;
 }
 
-static SPbool _bmt_transplant_proc_1(BMT_node x, BMT_node w, BMT_node* head)
+static BMT_bool _bmt_transplant_proc_1(BMT_node x, BMT_node w, BMT_node* head)
 {
     if (w)
     {
-        SPbool xBlack = x ? !x->red : BMT_TRUE;
-        SPbool maj = !_bmt_is_major(w);
+        BMT_bool xBlack = x ? !x->red : BMT_TRUE;
+        BMT_bool maj = !_bmt_is_major(w);
         if (xBlack && w->red)
         {
             // only x could be double black, w must be red
@@ -455,19 +455,19 @@ static SPbool _bmt_transplant_proc_1(BMT_node x, BMT_node w, BMT_node* head)
     return BMT_FALSE;
 }
 
-static SPbool _bmt_transplant_proc_2(BMT_node x, BMT_node w, BMT_node* head)
+static BMT_bool _bmt_transplant_proc_2(BMT_node x, BMT_node w, BMT_node* head)
 {
     if (w)
     {
         // x is black and w is black
         // x could be double black, w cannot be double black
-        SPbool xBlack = x ? !x->red : BMT_TRUE;
+        BMT_bool xBlack = x ? !x->red : BMT_TRUE;
         if (xBlack && !w->red)
         {
             // only x could be double black
-            SPbool maj = !_bmt_is_major(w);
-            SPbool wMnB = w->minor ? !w->minor->red : BMT_TRUE;
-            SPbool wMjB = w->major ? !w->major->red : BMT_TRUE;
+            BMT_bool maj = !_bmt_is_major(w);
+            BMT_bool wMnB = w->minor ? !w->minor->red : BMT_TRUE;
+            BMT_bool wMjB = w->major ? !w->major->red : BMT_TRUE;
             if (wMnB && wMjB)
             {
                 w->red = BMT_TRUE;
@@ -496,15 +496,15 @@ static SPbool _bmt_transplant_proc_2(BMT_node x, BMT_node w, BMT_node* head)
     return BMT_FALSE;
 }
 
-static SPbool _bmt_transplant_proc_3(BMT_node x, BMT_node w, BMT_node* head)
+static BMT_bool _bmt_transplant_proc_3(BMT_node x, BMT_node w, BMT_node* head)
 {
     if (w)
     {
-        SPbool xBlack = x ? !x->red : BMT_TRUE;
-        SPbool wMjB = w->major ? !w->major->red : BMT_TRUE;
-        SPbool wMnB = w->minor ? !w->minor->red : BMT_TRUE;
-        SPbool maj = !_bmt_is_major(w);
-        SPbool c = maj ? (!wMjB && wMnB) : (wMjB && !wMnB);
+        BMT_bool xBlack = x ? !x->red : BMT_TRUE;
+        BMT_bool wMjB = w->major ? !w->major->red : BMT_TRUE;
+        BMT_bool wMnB = w->minor ? !w->minor->red : BMT_TRUE;
+        BMT_bool maj = !_bmt_is_major(w);
+        BMT_bool c = maj ? (!wMjB && wMnB) : (wMjB && !wMnB);
 
         if (xBlack && c)
         {
@@ -519,17 +519,17 @@ static SPbool _bmt_transplant_proc_3(BMT_node x, BMT_node w, BMT_node* head)
     return BMT_FALSE;
 }
 
-static SPbool _bmt_transplant_proc_4(BMT_node x, BMT_node w, BMT_node* head)
+static BMT_bool _bmt_transplant_proc_4(BMT_node x, BMT_node w, BMT_node* head)
 {
     if (w)
     {
         // x can be double black
         // w cannot be double black
-        SPbool wMjR = w->major ? w->major->red : BMT_FALSE;
-        SPbool wMnR = w->minor ? w->minor->red : BMT_FALSE;
-        SPbool xBlack = x ? !x->red : BMT_TRUE;
-        SPbool maj = !_bmt_is_major(w);
-        SPbool c = maj ? wMnR : wMjR;
+        BMT_bool wMjR = w->major ? w->major->red : BMT_FALSE;
+        BMT_bool wMnR = w->minor ? w->minor->red : BMT_FALSE;
+        BMT_bool xBlack = x ? !x->red : BMT_TRUE;
+        BMT_bool maj = !_bmt_is_major(w);
+        BMT_bool c = maj ? wMnR : wMjR;
 
         if (xBlack && c)
         {

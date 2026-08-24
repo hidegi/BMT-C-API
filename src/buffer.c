@@ -7,9 +7,9 @@
  * it, you can buy us a beer in return.
  * -----------------------------------------------------------------------------
  */
-#include "RB/io/buffer.h"
-#include "RB/io/bmt.h"
-#include "RB/io/internal.h"
+#include "buffer.h"
+#include "bmt.h"
+#include "internal.h"
 
 #ifdef BMT_COMPILER_GNUC
 #define likely(x) __builtin_expect(!!(x), 1)
@@ -19,10 +19,10 @@
 #define unlikely(x) (x)
 #endif
 
-static int _spLazyInit(SPbuffer* b)
+static int _spLazyInit(BMT_buffer* b)
 {
     assert(!b->data && "Buffer already allocated");
-    SPsize capacity = 1024;
+    BMT_size capacity = 1024;
     b->data = malloc(capacity);
     b->length = 0;
     b->capacity = capacity;
@@ -30,7 +30,7 @@ static int _spLazyInit(SPbuffer* b)
     return unlikely(!b->data) ? BMT_FALSE : BMT_TRUE;
 }
 
-void spBufferFree(SPbuffer* b)
+void bmt_BufferFree(BMT_buffer* b)
 {
     if (b->data)
     {
@@ -40,7 +40,7 @@ void spBufferFree(SPbuffer* b)
     }
 }
 
-SPbool spBufferReserve(SPbuffer* b, SPsize reserved)
+BMT_bool bmt_BufferReserve(BMT_buffer* b, BMT_size reserved)
 {
     assert(b && "Cannot reserve for NULL");
 
@@ -57,7 +57,7 @@ SPbool spBufferReserve(SPbuffer* b, SPsize reserved)
     if (likely(b->capacity >= reserved))
         return BMT_TRUE;
 
-    SPsize targetCapacity = b->capacity;
+    BMT_size targetCapacity = b->capacity;
     while (targetCapacity < reserved)
     {
         // Check for overflow before doubling
@@ -67,7 +67,7 @@ SPbool spBufferReserve(SPbuffer* b, SPsize reserved)
             targetCapacity = reserved;
             break;
         }
-        SPsize newCapacity = targetCapacity * 2;
+        BMT_size newCapacity = targetCapacity * 2;
         if (newCapacity > BMT_MAX_BUFFER_SIZE)
         {
             newCapacity = reserved;
@@ -78,7 +78,7 @@ SPbool spBufferReserve(SPbuffer* b, SPsize reserved)
     unsigned char* tmp = realloc(b->data, targetCapacity);
     if (unlikely(!tmp))
     {
-        spBufferFree(b);
+        bmt_BufferFree(b);
         return BMT_FALSE;
     }
 
@@ -87,7 +87,7 @@ SPbool spBufferReserve(SPbuffer* b, SPsize reserved)
     return BMT_TRUE;
 }
 
-SPbool spBufferAppend(SPbuffer* b, const void* data, SPsize n)
+BMT_bool bmt_BufferAppend(BMT_buffer* b, const void* data, BMT_size n)
 {
     assert(b && "Cannot append to NULL");
     if (unlikely(!b->data) && unlikely(!_spLazyInit(b)))
@@ -101,7 +101,7 @@ SPbool spBufferAppend(SPbuffer* b, const void* data, SPsize n)
         return BMT_FALSE;
     }
 
-    if (unlikely(!spBufferReserve(b, b->length + n)))
+    if (unlikely(!bmt_BufferReserve(b, b->length + n)))
     {
         return BMT_FALSE;
     }

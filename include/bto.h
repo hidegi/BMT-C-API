@@ -5,8 +5,8 @@
  */
 #ifndef RB_BINARY_TREE_OBJECT_H
 #define RB_BINARY_TREE_OBJECT_H
-#include "RB/io/blo.h"
-#include "RB/io/object.h"
+#include "blo.h"
+#include "object.h"
 #include <SFML/System/Lock.hpp>
 #include <SFML/System/Mutex.hpp>
 #include <algorithm>
@@ -139,7 +139,7 @@ namespace rb
              *
              * ================================================================
              */
-            void add(const std::string& domain, SPsize length, const T data);
+            void add(const std::string& domain, BMT_size length, const T data);
 
             template<typename T>
 
@@ -192,7 +192,7 @@ namespace rb
              *
              * ================================================================
              */
-            bool parseArray(const std::string& expression, std::string& name, std::vector<SPsize>& v) const;
+            bool parseArray(const std::string& expression, std::string& name, std::vector<BMT_size>& v) const;
 
             /* ================================================================
              * Method isArrayExpression
@@ -272,6 +272,6 @@ namespace rb
             mutable sf::Mutex m_mutex;
     };
 
-#include "RB/io/bto.inl"
+#include "bto.inl"
 } // namespace rb
 #endif

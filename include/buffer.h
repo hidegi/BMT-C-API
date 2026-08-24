@@ -12,21 +12,21 @@
 #include "types.h"
 #include <stddef.h>
 
-#define BMT_BUFFER_INIT (struct SPbuffer) {NULL, 0, 0}
+#define BMT_BUFFER_INIT (struct BMT_buffer) {NULL, 0, 0}
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-typedef struct SPbuffer
+typedef struct BMT_buffer
 {
-	SPubyte* data;
-	SPsize length;
-	SPsize capacity;
-} SPbuffer;
+	BMT_ubyte* data;
+	BMT_size length;
+	BMT_size capacity;
+} BMT_buffer;
 
-void spBufferFree(SPbuffer* b);
-SPbool spBufferReserve(SPbuffer* b, SPsize reserved);
-SPbool spBufferAppend(SPbuffer* b, const void* data, SPsize n);
+void bmt_BufferFree(BMT_buffer* b);
+BMT_bool bmt_BufferReserve(BMT_buffer* b, BMT_size reserved);
+BMT_bool bmt_BufferAppend(BMT_buffer* b, const void* data, BMT_size n);
 
 #ifdef __cplusplus
 }
