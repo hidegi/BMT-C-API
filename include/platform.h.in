@@ -20,12 +20,12 @@
  * 3. This notice may not be removed or altered from any source
  * distribution.
  ****************************************************************************/
-#ifndef MT3_PLATFORM_H
-#define MT3_PLATFORM_H
+#ifndef BMT_PLATFORM_H
+#define BMT_PLATFORM_H
 
-#define BMT_VERSION_MAJOR @bmt_VERSION_MAJOR@
-#define BMT_VERSION_MINOR @bmt_VERSION_MINOR@
-#define BMT_VERSION_PATCH @bmt_VERSION_PATCH@
+#define BMT_VERSION_MAJOR @bmt_VERSION_MAJOR @
+#define BMT_VERSION_MINOR @bmt_VERSION_MINOR @
+#define BMT_VERSION_PATCH @bmt_VERSION_PATCH @
 
 #cmakedefine BMT_HAVE_BST_MAJOR_INCLINED
 #cmakedefine BMT_STATIC_BUILD
@@ -34,13 +34,13 @@
 #cmakedefine BMT_PLATFORM_LINUX
 
 #ifndef BMT_STATIC_BUILD
-	#if defined(BMT_PLATFORM_WINDOWS)
-		#define BMT_API __declspec(dllexport)
-	#else
-		#define BMT_API __attribute__((visibility("default")))
-	#endif
+#if defined(BMT_PLATFORM_WINDOWS)
+#define BMT_API __declspec(dllexport)
 #else
-	#define BMT_API
+#define BMT_API __attribute__((visibility("default")))
+#endif
+#else
+#define BMT_API
 #endif
 
 #if defined(__clang__)

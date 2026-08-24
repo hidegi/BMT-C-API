@@ -1,10 +1,6 @@
-<p align="left">
-  <img src="assets/mt3.png" width="128" height="128">
-</p>
-
-# The MT3-library (SP 1994)
-MT3 (short for MoTree) is a lightweight library for serializing and deserializing any plain structure to binary and vice versa (similar to Mojang's NBT-format).
-MT3 introduces an open format, the so called Binary Tree Object (BTO), of which's properties are explained overleaf.
+# BMT C-API (SP 1994)
+BMT (short for MoTree) is a lightweight library for serializing and deserializing any plain structure to binary and vice versa (similar to Mojang's NBT-format).
+BMT introduces an open format, the so called Binary Tree Object (BTO), of which's properties are explained overleaf.
 
 ## Motivation
 The BTO-format is intended to be a successor of Mojang's NBT-format. In a nutshell: Minecraft uses NBT-files to store arbitrary data for its game intrinsics.
@@ -56,11 +52,11 @@ Because of this, the runtime performance exhibits the properties of a doubly-lin
 | Insert | O(1) | O(n) |
 | Delete | O(1) | O(n) |
 
-As mentioned above, any list in a BTO-file is homogenous, meaning that different data types cannot be stored together in one list. This type-safety constraint is checked by the MT3-API.
+As mentioned above, any list in a BTO-file is homogenous, meaning that different data types cannot be stored together in one list. This type-safety constraint is checked by the BMT-API.
 
 ## Tree-Balancing
 The nodes in a tree are lexicographically ordered by their name. Since an RB-tree is self-balancing, any insertions or deletions will automatically rearrange the internal order of the tree. This allows for fast operations with
-an average performance of log2(n). The balancing-algorithm implemented by the MT3-API ensures the following properties for an RB-tree:
+an average performance of log2(n). The balancing-algorithm implemented by the BMT-API ensures the following properties for an RB-tree:
 | Operation | Average Case | Worst Case |
 | :---: | :---: | :---: |
 | Search | O(log2(n)) | O(log2(n)) |
@@ -68,38 +64,38 @@ an average performance of log2(n). The balancing-algorithm implemented by the MT
 | Delete | O(log2(n)) | O(log2(n)) |
 
 ## How to use
-This section demonstrates a short example of how to create and use tree-objects with the MT3-API.
+This section demonstrates a short example of how to create and use tree-objects with the BMT-API.
 ```C
-#include <mt3.h>
+#include <BMT.h>
 
 int main(int argc, char** argv)
 {
-  MT3_node root = NULL;
-  mt3_InsertByte(&root, "byte", 1); // at first use, allocates variable "root"
-  mt3_InsertShort(&root, "short", 12);
-  mt3_InsertInt(&root, "int", 1234);
-  mt3_InsertLong(&root, "long", 12345678);
-  mt3_InsertFloat(&root, "float", 3.14159265f);
-  mt3_InsertDouble(&root, "double", 13847.8374);
-  mt3_InsertString(&root, "string", "Hello World");
+  BMT_node root = NULL;
+  BMT_InsertByte(&root, "byte", 1); // at first use, allocates variable "root"
+  BMT_InsertShort(&root, "short", 12);
+  BMT_InsertInt(&root, "int", 1234);
+  BMT_InsertLong(&root, "long", 12345678);
+  BMT_InsertFloat(&root, "float", 3.14159265f);
+  BMT_InsertDouble(&root, "double", 13847.8374);
+  BMT_InsertString(&root, "string", "Hello World");
 
-  MT3_node subtree = NULL;
-  mt3_InsertString(&subtree, "str1", "I"); // at first use, allocates variable "subtree"
-  mt3_InsertString(&subtree, "str2", "am");
-  mt3_InsertString(&subtree, "str3", "a");
-  mt3_InsertString(&subtree, "str4", "subtree");
-  mt3_Insert(&root, "subtree", subtree);
-  mt3_Delete(&subtree); // deletes the subtree
+  BMT_node subtree = NULL;
+  BMT_InsertString(&subtree, "str1", "I"); // at first use, allocates variable "subtree"
+  BMT_InsertString(&subtree, "str2", "am");
+  BMT_InsertString(&subtree, "str3", "a");
+  BMT_InsertString(&subtree, "str4", "subtree");
+  BMT_Insert(&root, "subtree", subtree);
+  BMT_Delete(&subtree); // deletes the subtree
 
-  MT3_node intList = NULL;
+  BMT_node intList = NULL;
   for(size_t i = 0; i < 10; i++)
-    mt3_AppendInt(&intList, i + 1); // this will implicitly create an int-list
+    BMT_AppendInt(&intList, i + 1); // this will implicitly create an int-list
 
-  mt3_Insert(&root, "intList", intList);
-  mt3_Delete(&intList); // deletes the list
+  BMT_Insert(&root, "intList", intList);
+  BMT_Delete(&intList); // deletes the list
 
-  mt3_Print(root);
-  mt3_Delete(&root); // deletes the root-object
+  BMT_Print(root);
+  BMT_Delete(&root); // deletes the root-object
 
   return 0;
 }
@@ -113,7 +109,7 @@ To install GNU-Make, please consult following page: https://www.gnu.org/software
 
 Once CMake, GNU-Make and a working C/C++ are available, use the Command-Prompt or Shell to switch to the directory, where this repository is located on your local machine (you will need to use ```cd```).
 
-On the MT3-library folder, run following command:\
+On the BMT-library folder, run following command:\
 ```$ cmake -Bbuild -G"Unix Makefiles"```
 
 This will let CMake configure your project in order to create a Makefile in your build-folder. Once the configuration step has finished, switch to your build folder and run following command:
@@ -121,7 +117,7 @@ This will let CMake configure your project in order to create a Makefile in your
 
 You can of course use any CMake-Generator of choice, as well as have any other name for your build-directory. When the project has been built, you should be able to run the tests. Run following commands to see the results:
 ```
-$ cd MT3-library/[your-build-directory]/tests
+$ cd BMT-library/[your-build-directory]/tests
 $ ctest --output-on-failure
 ```
 
@@ -129,5 +125,5 @@ Additionally, this project provides two example programs:
 - A converter from JSON to BTO.
 - A pretty-print program that displays the internal layout of a BTO-file.
 
-Be advised that under Windows, you need to copy the ```libmt3.dll``` to your tests-and examples-folder, when specifying\
+Be advised that under Windows, you need to copy the ```libBMT.dll``` to your tests-and examples-folder, when specifying\
 ```-D BUILD_SHARED_LIBS=ON```
