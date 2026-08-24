@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.14 FATAL_ERROR)
-project(bmt VERSION 2.0.2 LANGUAGES C CXX)
+project(bmt VERSION 2.1.0 LANGUAGES C CXX)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake)
 include(utils)
