@@ -29,7 +29,9 @@ message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
 # Platform detection for platform.h generation
 #-----------------------------------------------------------------------------
 set(BMT_HAVE_BST_MAJOR_INCLINED 1)
-set(BMT_STATIC_BUILD 1)
+if(NOT BUILD_SHARED_LIBS)
+    set(BMT_STATIC_BUILD 1)
+endif()
 if(WIN32)
     set(BMT_PLATFORM_WINDOWS 1)
 elseif(APPLE)
@@ -63,9 +65,9 @@ if(NOT ZLIB_FOUND)
 endif()
 
 #-----------------------------------------------------------------------------
-# BMT — C99 static library (C-API only)
+# BMT — C99 library (C-API only)
 #-----------------------------------------------------------------------------
-add_library(bmt STATIC
+add_library(bmt
     src/bmt.c
     src/buffer.c
     src/treeops.c
@@ -80,6 +82,7 @@ target_include_directories(bmt
         $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src>
 )
 
+target_compile_definitions(bmt PRIVATE BMT_EXPORTS)
 target_link_libraries(bmt PRIVATE ZLIB::ZLIB)
 
 set_target_properties(bmt PROPERTIES

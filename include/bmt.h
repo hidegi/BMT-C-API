@@ -33,6 +33,7 @@
 #endif
 
 #include "buffer.h"
+#include "platform.h"
 #include "types.h"
 #include <assert.h>
 #include <stdio.h>
@@ -95,7 +96,7 @@ extern "C"
      * multiple threads operating on different trees, each thread will have
      * its own error state. This is intentional for thread-safety.
      */
-    extern BMT_THREAD_LOCAL BMT_status bmt_error_flag;
+    extern BMT_API BMT_THREAD_LOCAL BMT_status bmt_error_flag;
 
     struct _BMT_node
     {
@@ -140,7 +141,7 @@ extern "C"
      *
      *	@ingroup allocation
      */
-    BMT_node bmt_AllocTree();
+    BMT_API BMT_node bmt_AllocTree();
 
     /*!
      *	@brief Allocates a list-node.
@@ -153,7 +154,7 @@ extern "C"
      *
      *	@ingroup allocation
      */
-    BMT_node bmt_AllocList();
+    BMT_API BMT_node bmt_AllocList();
 
     /*!
      *	@brief Dumps an object to a human-readable string.
@@ -175,7 +176,7 @@ extern "C"
      *
      *	@ingroup debug
      */
-    BMT_buffer bmt_ToString(const BMT_node object);
+    BMT_API BMT_buffer bmt_ToString(const BMT_node object);
 
     /*!
      *	@brief Same as @ref bmt_ToString, but prints the output
@@ -183,7 +184,7 @@ extern "C"
      *
      *	@ingroup debug
      */
-    void bmt_Print(const BMT_node object);
+    BMT_API void bmt_Print(const BMT_node object);
 
     /*!
      *	@brief Compares the tag, colour, value and
@@ -194,7 +195,7 @@ extern "C"
      *
      *	@ingroup comparison
      */
-    BMT_bool bmt_IsEqual(const BMT_node a, const BMT_node b);
+    BMT_API BMT_bool bmt_IsEqual(const BMT_node a, const BMT_node b);
 
     /*!
      *	@brief Copies a tree-or list-node.
@@ -206,7 +207,7 @@ extern "C"
      *
      *	@ingroup copying
      */
-    BMT_node bmt_Copy(const BMT_node object);
+    BMT_API BMT_node bmt_Copy(const BMT_node object);
 
     /*!
      *	@brief Tells whether or not @param tree is a tree-node.
@@ -219,7 +220,7 @@ extern "C"
      *
      *	@ingroup tree-validation
      */
-    BMT_bool bmt_IsTree(const BMT_node tree);
+    BMT_API BMT_bool bmt_IsTree(const BMT_node tree);
 
     /*!
      *	@brief Inserts an empty tree-node to the given tree.
@@ -235,7 +236,7 @@ extern "C"
      *
      *	@ingroup tree-insertion
      */
-    void bmt_CreateTree(BMT_node* tree, const BMT_char* name);
+    BMT_API void bmt_CreateTree(BMT_node* tree, const BMT_char* name);
 
     /*!
      *	@brief Inserts an empty list-node to the given tree.
@@ -251,7 +252,7 @@ extern "C"
      *
      *	@ingroup tree-insertion
      */
-    void bmt_CreateList(BMT_node* tree, const BMT_char* name);
+    BMT_API void bmt_CreateList(BMT_node* tree, const BMT_char* name);
 
     /*!
      *	@brief Inserts a tree-or list-node to the given tree.
@@ -267,7 +268,7 @@ extern "C"
      *
      *	@ingroup tree-insertion
      */
-    void bmt_Insert(BMT_node* tree, const BMT_char* name, const BMT_node value);
+    BMT_API void bmt_Insert(BMT_node* tree, const BMT_char* name, const BMT_node value);
 
     /*!
      *	@brief Inserts a byte-node to the given tree.
@@ -283,7 +284,7 @@ extern "C"
      *
      *	@ingroup tree-insertion
      */
-    void bmt_InsertByte(BMT_node* tree, const BMT_char* name, BMT_byte value);
+    BMT_API void bmt_InsertByte(BMT_node* tree, const BMT_char* name, BMT_byte value);
 
     /*!
      *	@brief Inserts a short-node to the given tree.
@@ -299,7 +300,7 @@ extern "C"
      *
      *	@ingroup tree-insertion
      */
-    void bmt_InsertShort(BMT_node* tree, const BMT_char* name, BMT_short value);
+    BMT_API void bmt_InsertShort(BMT_node* tree, const BMT_char* name, BMT_short value);
 
     /*!
      *	@brief Inserts an int-node to the given tree.
@@ -315,7 +316,7 @@ extern "C"
      *
      *	@ingroup tree-insertion
      */
-    void bmt_InsertInt(BMT_node* tree, const BMT_char* name, BMT_int value);
+    BMT_API void bmt_InsertInt(BMT_node* tree, const BMT_char* name, BMT_int value);
 
     /*!
      *	@brief Inserts a long-node to the given tree.
@@ -331,7 +332,7 @@ extern "C"
      *
      *	@ingroup tree-insertion
      */
-    void bmt_InsertLong(BMT_node* tree, const BMT_char* name, BMT_long value);
+    BMT_API void bmt_InsertLong(BMT_node* tree, const BMT_char* name, BMT_long value);
 
     /*!
      *	@brief Inserts a float-node to the given tree.
@@ -347,7 +348,7 @@ extern "C"
      *
      *	@ingroup tree-insertion
      */
-    void bmt_InsertFloat(BMT_node* tree, const BMT_char* name, BMT_float value);
+    BMT_API void bmt_InsertFloat(BMT_node* tree, const BMT_char* name, BMT_float value);
 
     /*!
      *	@brief Inserts a double-node to the given tree.
@@ -363,7 +364,7 @@ extern "C"
      *
      *	@ingroup tree-insertion
      */
-    void bmt_InsertDouble(BMT_node* tree, const BMT_char* name, BMT_double value);
+    BMT_API void bmt_InsertDouble(BMT_node* tree, const BMT_char* name, BMT_double value);
 
     /*!
      *	@brief Inserts a string-node to the given tree.
@@ -381,7 +382,7 @@ extern "C"
      *
      *	@ingroup tree-insertion
      */
-    void bmt_InsertString(BMT_node* tree, const BMT_char* name, const BMT_char* value);
+    BMT_API void bmt_InsertString(BMT_node* tree, const BMT_char* name, const BMT_char* value);
 
     /*!
      *	@brief Inserts a byte-list-node to the given tree.
@@ -401,7 +402,7 @@ extern "C"
      *
      *	@ingroup tree-insertion
      */
-    void bmt_InsertByteList(BMT_node* tree, const BMT_char* name, BMT_size length, const BMT_byte* values);
+    BMT_API void bmt_InsertByteList(BMT_node* tree, const BMT_char* name, BMT_size length, const BMT_byte* values);
 
     /*!
      *	@brief Inserts a short-list-node to the given tree.
@@ -421,7 +422,7 @@ extern "C"
      *
      *	@ingroup tree-insertion
      */
-    void bmt_InsertShortList(BMT_node* tree, const BMT_char* name, BMT_size length, const BMT_short* values);
+    BMT_API void bmt_InsertShortList(BMT_node* tree, const BMT_char* name, BMT_size length, const BMT_short* values);
 
     /*!
      *	@brief Inserts an int-list-node to the given tree.
@@ -440,7 +441,7 @@ extern "C"
      *
      *	@ingroup tree-insertion
      */
-    void bmt_InsertIntList(BMT_node* tree, const BMT_char* name, BMT_size length, const BMT_int* values);
+    BMT_API void bmt_InsertIntList(BMT_node* tree, const BMT_char* name, BMT_size length, const BMT_int* values);
 
     /*!
      *	@brief Inserts a long-list-node to the given tree.
@@ -460,7 +461,7 @@ extern "C"
      *
      *	@ingroup tree-insertion
      */
-    void bmt_InsertLongList(BMT_node* tree, const BMT_char* name, BMT_size length, const BMT_long* values);
+    BMT_API void bmt_InsertLongList(BMT_node* tree, const BMT_char* name, BMT_size length, const BMT_long* values);
 
     /*!
      *	@brief Inserts a float-list-node to the given tree.
@@ -480,7 +481,7 @@ extern "C"
      *
      *	@ingroup tree-insertion
      */
-    void bmt_InsertFloatList(BMT_node* tree, const BMT_char* name, BMT_size length, const BMT_float* values);
+    BMT_API void bmt_InsertFloatList(BMT_node* tree, const BMT_char* name, BMT_size length, const BMT_float* values);
 
     /*!
      *	@brief Inserts a double-list-node to the given tree.
@@ -500,7 +501,7 @@ extern "C"
      *
      *	@ingroup tree-insertion
      */
-    void bmt_InsertDoubleList(BMT_node* tree, const BMT_char* name, BMT_size length, const BMT_double* values);
+    BMT_API void bmt_InsertDoubleList(BMT_node* tree, const BMT_char* name, BMT_size length, const BMT_double* values);
 
     /*!
      *	@brief Inserts a string-list-node to the given tree.
@@ -521,7 +522,7 @@ extern "C"
      *
      *	@ingroup tree-insertion
      */
-    void bmt_InsertStringList(BMT_node* tree, const BMT_char* name, BMT_size length, const BMT_char** values);
+    BMT_API void bmt_InsertStringList(BMT_node* tree, const BMT_char* name, BMT_size length, const BMT_char** values);
 
     /*!
      *	@brief Returns the value stored in any integer-type nodes
@@ -534,7 +535,7 @@ extern "C"
      *
      *	@ingroup tree-getters
      */
-    BMT_long bmt_GetNumber(const BMT_node tree, const BMT_char* name);
+    BMT_API BMT_long bmt_GetNumber(const BMT_node tree, const BMT_char* name);
 
     /*!
      *	@brief Returns the value stored in any floating-type nodes
@@ -547,7 +548,7 @@ extern "C"
      *
      *	@ingroup tree-getters
      */
-    BMT_double bmt_GetDecimal(const BMT_node tree, const BMT_char* name);
+    BMT_API BMT_double bmt_GetDecimal(const BMT_node tree, const BMT_char* name);
 
     /*!
      *	@brief Returns the value stored in a byte-node
@@ -560,7 +561,7 @@ extern "C"
      *
      *	@ingroup tree-getters
      */
-    BMT_byte bmt_GetByte(const BMT_node tree, const BMT_char* name);
+    BMT_API BMT_byte bmt_GetByte(const BMT_node tree, const BMT_char* name);
 
     /*!
      *	@brief Returns the value stored in a short-node
@@ -573,7 +574,7 @@ extern "C"
      *
      *	@ingroup tree-getters
      */
-    BMT_short bmt_GetShort(const BMT_node tree, const BMT_char* name);
+    BMT_API BMT_short bmt_GetShort(const BMT_node tree, const BMT_char* name);
 
     /*!
      *	@brief Returns the value stored in an int-node
@@ -586,7 +587,7 @@ extern "C"
      *
      *	@ingroup tree-getters
      */
-    BMT_int bmt_GetInt(const BMT_node tree, const BMT_char* name);
+    BMT_API BMT_int bmt_GetInt(const BMT_node tree, const BMT_char* name);
 
     /*!
      *	@brief Returns the value stored in a long-node
@@ -599,7 +600,7 @@ extern "C"
      *
      *	@ingroup tree-getters
      */
-    BMT_long bmt_GetLong(const BMT_node tree, const BMT_char* name);
+    BMT_API BMT_long bmt_GetLong(const BMT_node tree, const BMT_char* name);
 
     /*!
      *	@brief Returns the value stored in a float-node
@@ -612,7 +613,7 @@ extern "C"
      *
      *	@ingroup tree-getters
      */
-    BMT_float bmt_GetFloat(const BMT_node tree, const BMT_char* name);
+    BMT_API BMT_float bmt_GetFloat(const BMT_node tree, const BMT_char* name);
 
     /*!
      *	@brief Returns the value stored in a double-node
@@ -625,7 +626,7 @@ extern "C"
      *
      *	@ingroup tree-getters
      */
-    BMT_double bmt_GetDouble(const BMT_node tree, const BMT_char* name);
+    BMT_API BMT_double bmt_GetDouble(const BMT_node tree, const BMT_char* name);
 
     /*!
      *	@brief Returns the value stored in a string-node
@@ -638,7 +639,7 @@ extern "C"
      *
      *	@ingroup tree-getters
      */
-    const BMT_char* bmt_GetString(const BMT_node tree, const BMT_char* name);
+    BMT_API const BMT_char* bmt_GetString(const BMT_node tree, const BMT_char* name);
 
     /*!
      *	@brief Returns the object stored in a tree-or list-node.
@@ -651,43 +652,43 @@ extern "C"
      *
      *	@ingroup tree-getters
      */
-    BMT_node bmt_Get(const BMT_node tree, const BMT_char* name);
+    BMT_API BMT_node bmt_Get(const BMT_node tree, const BMT_char* name);
 
     /*!
      *	@brief Sets the value stored in a byte-node found by @param name.
      *	@ingroup tree-setters
      */
-    void bmt_SetByte(BMT_node tree, const BMT_char* name, BMT_byte value);
+    BMT_API void bmt_SetByte(BMT_node tree, const BMT_char* name, BMT_byte value);
 
     /*!
      *	@brief Sets the value stored in a short-node found by @param name.
      *	@ingroup tree-setters
      */
-    void bmt_SetShort(BMT_node tree, const BMT_char* name, BMT_short value);
+    BMT_API void bmt_SetShort(BMT_node tree, const BMT_char* name, BMT_short value);
 
     /*!
      *	@brief Sets the value stored in an int-node found by @param name.
      *	@ingroup tree-setters
      */
-    void bmt_SetInt(BMT_node tree, const BMT_char* name, BMT_int value);
+    BMT_API void bmt_SetInt(BMT_node tree, const BMT_char* name, BMT_int value);
 
     /*!
      *	@brief Sets the value stored in a long-node found by @param name.
      *	@ingroup tree-setters
      */
-    void bmt_SetLong(BMT_node tree, const BMT_char* name, BMT_long value);
+    BMT_API void bmt_SetLong(BMT_node tree, const BMT_char* name, BMT_long value);
 
     /*!
      *	@brief Sets the value stored in a float-node found by @param name.
      *	@ingroup tree-setters
      */
-    void bmt_SetFloat(BMT_node tree, const BMT_char* name, BMT_float value);
+    BMT_API void bmt_SetFloat(BMT_node tree, const BMT_char* name, BMT_float value);
 
     /*!
      *	@brief Sets the value stored in a double-node found by @param name.
      *	@ingroup tree-setters
      */
-    void bmt_SetDouble(BMT_node tree, const BMT_char* name, BMT_double value);
+    BMT_API void bmt_SetDouble(BMT_node tree, const BMT_char* name, BMT_double value);
 
     /*!
      *	@brief Sets the value stored in a long-node found by @param name.
@@ -696,7 +697,7 @@ extern "C"
      *
      *	@ingroup tree-setters
      */
-    void bmt_SetString(BMT_node tree, const BMT_char* name, const BMT_char* value);
+    BMT_API void bmt_SetString(BMT_node tree, const BMT_char* name, const BMT_char* value);
 
     /*!
      *	@brief Removes a node from a tree.
@@ -708,7 +709,7 @@ extern "C"
      *
      *	@ingroup tree-removal
      */
-    BMT_bool bmt_Remove(BMT_node* tree, const BMT_char* name);
+    BMT_API BMT_bool bmt_Remove(BMT_node* tree, const BMT_char* name);
 
     /*!
      *	@brief Checks if @param rbt conforms the properties
@@ -720,7 +721,7 @@ extern "C"
      *	@ingroup tree-validation
      */
 
-    BMT_bool bmt_IsValidRBT(const BMT_node rbt);
+    BMT_API BMT_bool bmt_IsValidRBT(const BMT_node rbt);
 
     /*!
      *	@brief Tells whether or not @param list is a list-node.
@@ -730,7 +731,7 @@ extern "C"
      *
      *	@ingroup list-validation
      */
-    BMT_bool bmt_IsList(const BMT_node list);
+    BMT_API BMT_bool bmt_IsList(const BMT_node list);
 
     /*!
      *	@brief Returns the length of @param list.
@@ -740,7 +741,7 @@ extern "C"
      *
      *	@ingroup list-insertion
      */
-    BMT_size bmt_Length(const BMT_node list);
+    BMT_API BMT_size bmt_Length(const BMT_node list);
 
     /*!
      *	@brief Appends a tree-or list-node to the given list.
@@ -756,7 +757,7 @@ extern "C"
      *
      *	@ingroup list-insertion
      */
-    void bmt_Append(BMT_node* list, const BMT_node value);
+    BMT_API void bmt_Append(BMT_node* list, const BMT_node value);
 
     /*!
      *	@brief Appends a byte-node to the given list.
@@ -769,7 +770,7 @@ extern "C"
      *
      *	@ingroup list-insertion
      */
-    void bmt_AppendByte(BMT_node* list, BMT_byte value);
+    BMT_API void bmt_AppendByte(BMT_node* list, BMT_byte value);
 
     /*!
      *	@brief Appends a short-node to the given list.
@@ -782,7 +783,7 @@ extern "C"
      *
      *	@ingroup list-insertion
      */
-    void bmt_AppendShort(BMT_node* list, BMT_short value);
+    BMT_API void bmt_AppendShort(BMT_node* list, BMT_short value);
 
     /*!
      *	@brief Appends an int-node to the given list.
@@ -795,7 +796,7 @@ extern "C"
      *
      *	@ingroup list-insertion
      */
-    void bmt_AppendInt(BMT_node* list, BMT_int value);
+    BMT_API void bmt_AppendInt(BMT_node* list, BMT_int value);
 
     /*!
      *	@brief Appends a long-node to the given list.
@@ -808,7 +809,7 @@ extern "C"
      *
      *	@ingroup list-insertion
      */
-    void bmt_AppendLong(BMT_node* list, BMT_long value);
+    BMT_API void bmt_AppendLong(BMT_node* list, BMT_long value);
 
     /*!
      *	@brief Appends a float-node to the given list.
@@ -821,7 +822,7 @@ extern "C"
      *
      *	@ingroup list-insertion
      */
-    void bmt_AppendFloat(BMT_node* list, BMT_float value);
+    BMT_API void bmt_AppendFloat(BMT_node* list, BMT_float value);
 
     /*!
      *	@brief Appends a double-node to the given list.
@@ -834,7 +835,7 @@ extern "C"
      *
      *	@ingroup list-insertion
      */
-    void bmt_AppendDouble(BMT_node* list, BMT_double value);
+    BMT_API void bmt_AppendDouble(BMT_node* list, BMT_double value);
 
     /*!
      *	@brief Appends a string-node to the given list.
@@ -849,7 +850,7 @@ extern "C"
      *
      *	@ingroup list-insertion
      */
-    void bmt_AppendString(BMT_node* list, const BMT_char* value);
+    BMT_API void bmt_AppendString(BMT_node* list, const BMT_char* value);
 
     /*!
      *	@brief Appends a byte-list-node to the given list.
@@ -869,7 +870,7 @@ extern "C"
      *
      *	@ingroup list-insertion
      */
-    void bmt_AppendByteList(BMT_node* list, BMT_size length, const BMT_byte* values);
+    BMT_API void bmt_AppendByteList(BMT_node* list, BMT_size length, const BMT_byte* values);
 
     /*!
      *	@brief Appends a short-list-node to the given list.
@@ -889,7 +890,7 @@ extern "C"
      *
      *	@ingroup list-insertion
      */
-    void bmt_AppendShortList(BMT_node* list, BMT_size length, const BMT_short* values);
+    BMT_API void bmt_AppendShortList(BMT_node* list, BMT_size length, const BMT_short* values);
 
     /*!
      *	@brief Appends an int-list-node to the given list.
@@ -909,7 +910,7 @@ extern "C"
      *
      *	@ingroup list-insertion
      */
-    void bmt_AppendIntList(BMT_node* list, BMT_size length, const BMT_int* values);
+    BMT_API void bmt_AppendIntList(BMT_node* list, BMT_size length, const BMT_int* values);
 
     /*!
      *	@brief Appends a long-list-node to the given list.
@@ -929,7 +930,7 @@ extern "C"
      *
      *	@ingroup list-insertion
      */
-    void bmt_AppendLongList(BMT_node* list, BMT_size length, const BMT_long* values);
+    BMT_API void bmt_AppendLongList(BMT_node* list, BMT_size length, const BMT_long* values);
 
     /*!
      *	@brief Appends a float-list-node to the given list.
@@ -949,7 +950,7 @@ extern "C"
      *
      *	@ingroup list-insertion
      */
-    void bmt_AppendFloatList(BMT_node* list, BMT_size length, const BMT_float* values);
+    BMT_API void bmt_AppendFloatList(BMT_node* list, BMT_size length, const BMT_float* values);
 
     /*!
      *	@brief Appends a double-list-node to the given list.
@@ -969,7 +970,7 @@ extern "C"
      *
      *	@ingroup list-insertion
      */
-    void bmt_AppendDoubleList(BMT_node* list, BMT_size length, const BMT_double* values);
+    BMT_API void bmt_AppendDoubleList(BMT_node* list, BMT_size length, const BMT_double* values);
 
     /*!
      *	@brief Appends a string-list-node to the given list.
@@ -990,7 +991,7 @@ extern "C"
      *
      *	@ingroup list-insertion
      */
-    void bmt_AppendStringList(BMT_node* list, BMT_size length, const BMT_char** values);
+    BMT_API void bmt_AppendStringList(BMT_node* list, BMT_size length, const BMT_char** values);
 
     /*!
      *	@brief Converts a contiguous array in memory to a linked list.
@@ -1000,7 +1001,7 @@ extern "C"
      *
      *	@ingroup list-conversion
      */
-    BMT_node bmt_ToList(BMT_tag tag, BMT_size length, const void* data);
+    BMT_API BMT_node bmt_ToList(BMT_tag tag, BMT_size length, const void* data);
 
     /*!
      *	@brief Removes an element of a list at the index @param pos.
@@ -1015,7 +1016,7 @@ extern "C"
      *
      *	@ingroup list-removal
      */
-    void bmt_RemoveAt(BMT_node* list, BMT_index pos);
+    BMT_API void bmt_RemoveAt(BMT_node* list, BMT_index pos);
 
     /*!
      *	@brief Dumps a tree to binary.
@@ -1028,7 +1029,7 @@ extern "C"
      *
      *	@ingroup tree-serialization
      */
-    BMT_buffer bmt_EncodeTree(const BMT_node tree);
+    BMT_API BMT_buffer bmt_EncodeTree(const BMT_node tree);
 
     /*!
      *	@brief Reads a tree-node from a buffer in memory.
@@ -1041,7 +1042,7 @@ extern "C"
      *
      *	@ingroup tree-deserialization
      */
-    BMT_node bmt_DecodeTree(BMT_buffer buffer);
+    BMT_API BMT_node bmt_DecodeTree(BMT_buffer buffer);
 
     /*!
      *	@brief Deletes an object node.
@@ -1051,7 +1052,7 @@ extern "C"
      *
      *	@ingroup deletion
      */
-    void bmt_Delete(BMT_node* object);
+    BMT_API void bmt_Delete(BMT_node* object);
 
     /*!
      *	@brief Returns the last error and resets to BMT_STATUS_OK.
@@ -1060,7 +1061,7 @@ extern "C"
      *
      *	@ingroup error-signaling
      */
-    BMT_status bmt_GetLastError();
+    BMT_API BMT_status bmt_GetLastError();
 
     /*!
      *	@brief Returns an informative error-string by @param status.
@@ -1069,7 +1070,7 @@ extern "C"
      *
      *	@ingroup error-signaling
      */
-    const BMT_char* bmt_GetErrorInfo(BMT_status status);
+    BMT_API const BMT_char* bmt_GetErrorInfo(BMT_status status);
 #ifdef __cplusplus
 }
 #endif
