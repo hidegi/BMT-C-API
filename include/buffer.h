@@ -9,6 +9,7 @@
  */
 #ifndef BMT_BUFFER_H
 #define BMT_BUFFER_H
+#include "platform.h"
 #include "types.h"
 #include <stddef.h>
 
@@ -25,9 +26,9 @@ extern "C"
             BMT_size capacity;
     } BMT_buffer;
 
-    void bmt_BufferFree(BMT_buffer* b);
-    BMT_bool bmt_BufferReserve(BMT_buffer* b, BMT_size reserved);
-    BMT_bool bmt_BufferAppend(BMT_buffer* b, const void* data, BMT_size n);
+    BMT_API void bmt_BufferFree(BMT_buffer* b);
+    BMT_API BMT_bool bmt_BufferReserve(BMT_buffer* b, BMT_size reserved);
+    BMT_API BMT_bool bmt_BufferAppend(BMT_buffer* b, const void* data, BMT_size n);
 
 #ifdef __cplusplus
 }
